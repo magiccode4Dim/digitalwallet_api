@@ -10,6 +10,7 @@ from rest_framework.authtoken.models import Token
 from .serializer import UserSerializer
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import status
+from opt_module.models import accontValidationOTP,operacaoOPT
 
 #cria um novo token para um utilizador
 def recriar_token_utilizador(user):
@@ -53,14 +54,10 @@ class Register(APIView):
             try:
                 validate_password(password)
             except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            
-            #Logica para o envio do email de confirmacao
-            
-            #fim da logica para envio de email de confirmacao
-            newUser.save()
-            
-            return Response({'status':'created!'},status=status.HTTP_201_CREATED)
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)          
+            #GUARDA O USUARIO NAO ACTIVO
+            u = newUser.save()
+            return Response({'id_user':u.id},status=status.HTTP_201_CREATED)
         else:
             #retorna o motivo dos dados nao serem validos
              return Response(newUser.errors, status=status.HTTP_400_BAD_REQUEST)

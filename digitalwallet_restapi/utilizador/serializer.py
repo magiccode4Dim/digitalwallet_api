@@ -8,6 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Extrai a senha dos dados validados
         password = validated_data.pop('password', None)
+        #cria o usuario ja desabilitado
+        validated_data['is_active'] = False
 
         # Cria o usuário sem definir a senha ainda
         user = User.objects.create(**validated_data)

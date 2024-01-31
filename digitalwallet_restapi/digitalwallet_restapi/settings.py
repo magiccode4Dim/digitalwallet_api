@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'levantamento',
     'operacao',
     'transferencia',
+    'opt_module',
     'utilizador',
     'rest_framework',
     'rest_framework.authtoken'
