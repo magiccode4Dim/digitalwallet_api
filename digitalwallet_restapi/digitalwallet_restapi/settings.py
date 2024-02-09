@@ -37,15 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'utilizador',
     'agente',
     'cliente',
     'conta',
+    'operacao',
     'deposito',
     'levantamento',
-    'operacao',
     'transferencia',
     'opt_module',
-    'utilizador',
     'rest_framework',
     'rest_framework.authtoken'
 ]
@@ -92,8 +92,29 @@ DATABASES = {
         'PASSWORD':'2001',
         'HOST':'172.17.0.2',
         'PORT':5432
+    },
+    'otp_dbtemp': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'tempcarteiradigital',
+        'USER':'narciso',
+        'PASSWORD':'2001',
+        'HOST':'172.17.0.2',
+        'PORT':5432
     }
 }
+
+#Roteadores de base de dados
+DATABASE_ROUTERS = [
+                    'opt_module.routers.OptmoduleRouter',
+                    'utilizador.routers.DjangoContribRouter',
+                    'cliente.routers.ClienteRouter',
+                    'conta.routers.ContaRouter',
+                    'agente.routers.AgentRouter',
+                    'operacao.routers.OperacaoRouter',
+                    'deposito.routers.DepositoRouter',
+                    'levantamento.routers.LevantamentoRouter',
+                    'transferencia.routers.TransferenciaRouter'
+                    ]
 
 
 # Password validation

@@ -10,3 +10,4 @@ class Conta(models.Model):
     numero = models.CharField(max_length=100)
     data_abertura = models.DateTimeField(default=timezone.now)
     saldo = models.FloatField(default=0.0)
+    

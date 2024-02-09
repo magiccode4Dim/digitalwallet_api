@@ -9,3 +9,4 @@ class Transferencia(models.Model):
     id_agent = models.ForeignKey(Agente, on_delete=models.CASCADE)
     id_operacao = models.ForeignKey(Operacao, on_delete=models.CASCADE)
     numero_conta = models.CharField(max_length=100)
+    
