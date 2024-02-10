@@ -27,7 +27,8 @@ class Register(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um para obtenção do token
     def post(self, request):
-        newAgent = AgenteSerializer(data=request.data)
+        #INICIALIZA OS DADOS EM UM SERIALIZADOR DA BASE DE DADOS TEMPORARIA
+        newAgent = Temp_AgenteSerializer(data=request.data)
         if newAgent.is_valid():
             id_user = request.data.get('id_user')
             #deve verificar se este usuario esta associado a um usuario ou se esta associado a uma conta cliente
@@ -48,7 +49,7 @@ class Register(APIView):
             #envia a mensagem
             send_messages(otpmessage)
             #salva o agente na tabela provisoria antes de bazar para a principal
-            #newAgent.save()
+            newAgent.save()
              
             
             return Response({'username':user.username,"message":"O codigo de confirmacao foi enviado ao seu contacto"},status=status.HTTP_201_CREATED)

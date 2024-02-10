@@ -26,4 +26,5 @@ urlpatterns = [
     path('operacao/', include('operacao.urls')),
     path('transferencia/', include('transferencia.urls')),
     path('utilizador/', include('utilizador.urls')),
+    path('otp/', include('opt_module.urls')),
 ]

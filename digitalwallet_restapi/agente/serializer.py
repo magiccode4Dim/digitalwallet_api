@@ -4,4 +4,4 @@ from .models import Agente
 class AgenteSerializer(serializers.ModelSerializer):
     class Meta:
         model=Agente
-        fields=('id','id_user','saldo')
+        fields=('id','id_user','saldo','celular')
