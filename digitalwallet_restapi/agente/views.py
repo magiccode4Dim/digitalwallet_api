@@ -14,8 +14,11 @@ from opt_module.models import accontValidationOTP
 from django.contrib.auth.models import User
 import random
 from opt_module.serializer import *
+import django
 
 # Create your views here.
+
+#DEVO COLOCAR PERMISSOES PARA A CHAMADA DE DETERMINADAS URLS
 @api_view(['GET'])
 def getAll(request):
     data = Agente.objects.all()
@@ -32,7 +35,10 @@ class Register(APIView):
         if newAgent.is_valid():
             id_user = request.data.get('id_user')
             #deve verificar se este usuario esta associado a um usuario ou se esta associado a uma conta cliente
-            user =  User.objects.get(id=id_user)
+            try:
+                user =  User.objects.get(id=id_user)
+            except django.contrib.auth.models.User.DoesNotExist:
+                return Response({"erro":"iduser not found"}, status=status.HTTP_404_NOT_FOUND)
             #envia uma mensagem de OPT para o cliente validar a conta
             #cria um objecto accontvalidationOTP vinculado com aconta do usuario
             avOPT =  accontValidateOPTSerializer(data={
