@@ -1,4 +1,7 @@
 from django.shortcuts import render
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -19,13 +22,17 @@ import django
 # Create your views here.
 
 #DEVO COLOCAR PERMISSOES PARA A CHAMADA DE DETERMINADAS URLS
+# Permitir acesso a apenas os que estiverem autenticados nao importa quem é
+#Autenticacao para ver a view, significa que devo passar o token
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def getAll(request):
     data = Agente.objects.all()
     serializer = AgenteSerializer(data, many=True)
     return Response(serializer.data)
 
-#Criar uma conta agente...
+#Criar uma agente...
 class Register(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um para obtenção do token

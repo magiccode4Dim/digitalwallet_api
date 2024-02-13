@@ -6,5 +6,5 @@ from .views import *
 app_name = 'conta'
 
 urlpatterns = [
-
+    path('register',Register.as_view(),name="RegisterConta")  
 ]
