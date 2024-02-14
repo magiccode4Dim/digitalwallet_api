@@ -14,6 +14,10 @@ from agente.models import Agente
 from cliente.models import Cliente
 from agente.serializer import AgenteSerializer
 from cliente.serializer import ClienteSerializer
+import cliente
+import django
+from conta.serializer import *
+from conta.models import *
 # Create your views here.
 
 #FUNCOES AUXILIARES - INICIO
@@ -54,11 +58,23 @@ def moveClientOrAgentetoMainDB(user):
             return True
     return False        
     
+#move a conta de um cliente para a base de dados principal
+def moveNewClientContaToMainDB(id_temp,id_client):
+    tempContas = Temp_Conta.objects.filter(id=id_temp,id_client=id_client)
+    if(tempContas!=None):
+        tempContaSer =  Temp_ContaSerializer(tempContas.first(),many=False)
+        contaSer = ContaSerializer(data=tempContaSer.data,many=False)
+        if contaSer.is_valid():
+            newc = contaSer.save()
+            tempContas.first().delete()
+            return newc
+    return None
+         
         
 
 #FUNCOES AUXILIARES - FIM
 
-#Envio de codigo OPT para validação de uma Conta
+#Envio de codigo OPT para validação de uma Conta no sistema, seja ela cliente ou agente
 class otp_account_validation(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um 
@@ -67,10 +83,13 @@ class otp_account_validation(APIView):
             id_user = int(request.data.get('id_user'))
             otp_code = int(request.data.get('otp_code'))
         except ValueError as e:
-            return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
         #Verificar se opt existe
         otp_temp = accontValidationOTP.objects.filter(id_user=id_user,optcode=otp_code).first()
-        user =  User.objects.get(id=id_user)
+        try:
+            user =  User.objects.get(id=id_user)
+        except django.contrib.auth.models.User.DoesNotExist:
+            return Response({"error":"invalid id_user"},status=status.HTTP_400_BAD_REQUEST)
         if(otp_temp == None):
             #se o codigo OPT  nao existir, verifica se o usuario que se pretende validar existe
             if user != None:
@@ -111,3 +130,39 @@ class otp_account_validation(APIView):
             return Response({"message":"Congrats! Your Accont is valid rigth now"},status=status.HTTP_200_OK)
         else:
             return Response({"error":"we had some problem with this validation"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+#Envio de OPT para validar um conta que o cliente criou para guardar dinheiro mesmo
+class otp_client_account_validation(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
+    def post(self, request):
+        #antes de mais nada, verifica se os dados sao validos
+        try:
+            otp_code = int(request.data.get('otp_code'))
+        except ValueError as e:
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        
+        id_user = request.user.id
+        #VERIFICAR SE O USUARIO É UM CLIENTE PORQUE, SO PODEM VALIDAR CONTAS DE DINHEIRO AQUELES QUE SÃO CLIENTE
+        try:
+            cli = Cliente.objects.get(id_user=id_user)
+        except cliente.models.Cliente.DoesNotExist:
+            return Response({"erro":"client not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        #VERIFICA SE O CODIGO OTP ENVIADO É VALIDO
+        otp_temp = operacaoOPT.objects.filter(optcode=otp_code).first()
+        if(otp_temp == None):
+            #Se nao for valido, não há como, o utilizador terá que abrir a conta novamente
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        
+        #SE TUDO ESTIVER CERTO, MOVE A NOVA CONTA PARA A TABELA CERTA
+        #Nesse caso, o ID_temp, fara um link com as contas que estiverem presas na tabela temporaria sem validação
+        newConta = moveNewClientContaToMainDB(otp_temp.id_temp,cli.id)
+        if(newConta!=None):
+            #apaga o otp
+            otp_temp.delete()
+            return Response({"message":f"Congrats! Your have new Account number is {newConta.numero}"},status=status.HTTP_200_OK)
+        else:
+            return Response({"error":"we had some problem with this validation"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        

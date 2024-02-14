@@ -65,7 +65,7 @@ class Register(APIView):
             newAgent.save()
              
             
-            return Response({'username':user.username,"message":"O codigo de confirmacao foi enviado ao seu contacto"},status=status.HTTP_201_CREATED)
+            return Response({"message":"O codigo de confirmacao foi enviado ao seu contacto"},status=status.HTTP_201_CREATED)
         else:
             #retorna o motivo dos dados nao serem validos
              return Response(newAgent.errors, status=status.HTTP_400_BAD_REQUEST)

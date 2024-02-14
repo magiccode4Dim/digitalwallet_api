@@ -5,7 +5,7 @@ from .optcodeGenerator import generate_unique_optcode
 class operacaoOPTSerializer(serializers.ModelSerializer):
     class Meta:
         model = operacaoOPT
-        fields = ('id', 'id_operacao','optcode')
+        fields = ('id', 'id_temp','optcode')
     def create(self, validated_data):
         # Cria o usuário sem definir a senha ainda
         operacaootpcode = operacaoOPT.objects.create(**validated_data)
