@@ -44,6 +44,9 @@ class Register(APIView):
             #deve verificar se este usuario esta associado a um usuario ou se esta associado a uma conta cliente
             try:
                 user =  User.objects.get(id=id_user)
+                #deve vericar se o usuario ja esta activado, porque nao pode permitir que este tenha 2 contas agente ou cliente
+                if user.is_active:
+                    return Response({"erro":"invalid iduser"}, status=status.HTTP_406_NOT_ACCEPTABLE)
             except django.contrib.auth.models.User.DoesNotExist:
                 return Response({"erro":"iduser not found"}, status=status.HTTP_404_NOT_FOUND)
             #envia uma mensagem de OPT para o cliente validar a conta

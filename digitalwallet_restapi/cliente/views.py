@@ -24,6 +24,8 @@ class Register(APIView):
             id_user = request.data.get('id_user')
             try:
                 user =  User.objects.get(id=id_user)
+                if user.is_active:
+                    return Response({"erro":"invalid iduser"}, status=status.HTTP_406_NOT_ACCEPTABLE)
             except django.contrib.auth.models.User.DoesNotExist:
                 return Response({"erro":"iduser not found"}, status=status.HTTP_404_NOT_FOUND)
             avOPT =  accontValidateOPTSerializer(data={
