@@ -46,7 +46,7 @@ class Temp_DepositoSerializer(serializers.ModelSerializer):
     class Meta:
         model=Temp_Deposito
         #nesse caso, o id_agent sera obtido atravez do token de autenticacao do usuario
-        fields=('id','id_operacao')
+        fields=('id','id_agent','id_operacao')
 
 class Temp_LevantamentoSerializer(serializers.ModelSerializer):
     class Meta:

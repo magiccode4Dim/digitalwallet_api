@@ -21,6 +21,7 @@ from conta.models import *
 from operacao.views import userIsAgentOrClient
 from deposito.views import transation_Deposit
 from operacao.models import Operacao
+from django.db import transaction
 # Create your views here.
 
 #FUNCOES AUXILIARES - INICIO
@@ -38,7 +39,11 @@ def getTempUserPhoneNumber(id_user):
     return None
 
 #Move dados das tabelaS Temporarias Agente ou Cliente
-def moveClientOrAgentetoMainDB(user):
+@transaction.atomic
+def moveClientOrAgentetoMainDB(user,otp_temp):
+    #Activa o usuario
+    user.is_active=True
+    user.save()
     #para clientes
     tempClients = Temp_Cliente.objects.filter(id_user=user.id)
     if(tempClients!=None):
@@ -48,7 +53,9 @@ def moveClientOrAgentetoMainDB(user):
             CliSer.save()
             #apaga o que estiver na tabela temporaria
             tempClients.first().delete()
-            return True
+            #apaga o codigo otp da tabela de OPT'S, porque o codigo ja foi utilizado
+            otp_temp.delete()
+            return
     #para agentes
     tempAgents = Temp_Agente.objects.filter(id_user=user.id)
     if(tempAgents!=None):
@@ -58,11 +65,14 @@ def moveClientOrAgentetoMainDB(user):
             AgentSer.save()
             #apaga o que estiver na tabela temporaria
             tempAgents.first().delete()
-            return True
-    return False        
+            #apaga o codigo otp da tabela de OPT'S, porque o codigo ja foi utilizado
+            otp_temp.delete()
+            return
+    raise Exception("we had some problem with this validation")        
     
 #move a conta de um cliente para a base de dados principal
-def moveNewClientContaToMainDB(id_temp,id_client):
+@transaction.atomic
+def moveNewClientContaToMainDB(id_temp,id_client,otp_temp):
     tempContas = Temp_Conta.objects.filter(id=id_temp,id_client=id_client)
     if(tempContas!=None):
         tempContaSer =  Temp_ContaSerializer(tempContas.first(),many=False)
@@ -70,8 +80,10 @@ def moveNewClientContaToMainDB(id_temp,id_client):
         if contaSer.is_valid():
             newc = contaSer.save()
             tempContas.first().delete()
+            #apaga o otp
+            otp_temp.delete()
             return newc
-    return None
+    raise Exception("we had some problem with this validation") 
          
         
 
@@ -125,14 +137,12 @@ class otp_account_validation(APIView):
         #Se o codigo OTP existir, o codigo vai continuar a execução por aqui
         #este techo do codigo vai executar se o codigo for valido
         #a conta vai ser activada e os dados da tabela temporaria irao para a tabela definitiva
-        user.is_active=True
-        user.save()
-        if (moveClientOrAgentetoMainDB(user)):#move de uma base de dados para outra
-            #apaga o codigo otp da tabela de OPT'S, porque o codigo ja foi utilizado
-            otp_temp.delete()
+        
+        try :
+            moveClientOrAgentetoMainDB(user,otp_temp)#move de uma base de dados para outra
             return Response({"message":"Congrats! Your Accont is valid rigth now"},status=status.HTTP_200_OK)
-        else:
-            return Response({"error":"we had some problem with this validation"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error":str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
 #Envio de OPT para validar um conta que o cliente criou para guardar dinheiro mesmo
@@ -161,13 +171,11 @@ class otp_client_account_validation(APIView):
         
         #SE TUDO ESTIVER CERTO, MOVE A NOVA CONTA PARA A TABELA CERTA
         #Nesse caso, o ID_temp, fara um link com as contas que estiverem presas na tabela temporaria sem validação
-        newConta = moveNewClientContaToMainDB(otp_temp.id_temp,cli.id)
-        if(newConta!=None):
-            #apaga o otp
-            otp_temp.delete()
+        try:
+            newConta = moveNewClientContaToMainDB(otp_temp.id_temp,cli.id,otp_temp)
             return Response({"message":f"Congrats! Your have new Account number is {newConta.numero}"},status=status.HTTP_200_OK)
-        else:
-            return Response({"error":"we had some problem with this validation"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error":str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 #Validacao de uma operacao de Deposito
 class otp_deposit_validation(APIView):
