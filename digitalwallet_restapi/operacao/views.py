@@ -35,7 +35,7 @@ class Register(APIView):
         res = userIsAgentOrClient(id_user)
         if(not res[0]):
             #se nao for nem cliente nem agente
-            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             if(res[1]=='agent'):
                 #se for ou um agente, a operacao podera ser criada sem nenhum problema

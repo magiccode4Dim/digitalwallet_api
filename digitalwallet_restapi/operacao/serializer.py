@@ -4,4 +4,4 @@ from .models import Operacao
 class OperacaoSerializer(serializers.ModelSerializer):
     class Meta:
         model=Operacao
-        fields=('id','id_conta','data_operacao')
+        fields=('id','id_conta','data_operacao','valor')

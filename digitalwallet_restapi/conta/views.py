@@ -46,8 +46,6 @@ class Register(APIView):
             })
             if newOtpcode.is_valid():
                 newOTPconta = newOtpcode.save()
-            else:
-                return Response(newOtpcode.errors, status=status.HTTP_400_BAD_REQUEST)
             
             #envia a mensagem via OPT para o cliente
             otpmessage = mensagem_de_abertura_de_conta(newOTPconta.optcode,cli.celular,newc.data_abertura)

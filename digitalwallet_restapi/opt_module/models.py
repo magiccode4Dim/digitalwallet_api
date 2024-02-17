@@ -8,7 +8,7 @@ class operacaoOPT(models.Model):
     id = models.AutoField(primary_key=True)
     optcode = models.IntegerField(unique=True)
     #id_temp é o ID do objecto temporario associado a essa validacao OTP. nesse caso o objecto temporario é uma operacao
-    id_temp = models.IntegerField(unique=True)
+    id_temp = models.IntegerField()
             
 #Classe OPT para validacao de contas
 #Quando a conta é criada, ela já fica desabilitada. É habilitada somente quando esse OTP for confirmado
@@ -45,22 +45,22 @@ class Temp_Cliente(models.Model):
 class Temp_Conta(models.Model):
     id = models.AutoField(primary_key=True)
     id_client =  models.IntegerField()
-    numero = models.CharField(max_length=100)
+    numero = models.CharField(max_length=100,unique=True)
     data_abertura = models.DateTimeField(default=timezone.now)
     saldo = models.FloatField(default=0.0)
 
 class Temp_Deposito(models.Model):
     id = models.AutoField(primary_key=True)
-    id_agent = models.IntegerField()
-    id_operacao = models.IntegerField()
+    id_agent = models.IntegerField(default=0)
+    id_operacao = models.IntegerField(unique=True)
     
 class Temp_Levantamento(models.Model):
     id = models.AutoField(primary_key=True)
     id_agent = models.IntegerField()
-    id_operacao = models.IntegerField()
+    id_operacao = models.IntegerField(unique=True)
     
 class Temp_Transferencia(models.Model):
     id = models.AutoField(primary_key=True)
     id_agent = models.IntegerField()
-    id_operacao = models.IntegerField()
+    id_operacao = models.IntegerField(unique=True)
     numero_conta = models.CharField(max_length=100)

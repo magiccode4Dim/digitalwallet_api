@@ -45,15 +45,16 @@ class Temp_ContaSerializer(serializers.ModelSerializer):
 class Temp_DepositoSerializer(serializers.ModelSerializer):
     class Meta:
         model=Temp_Deposito
-        fields=('id','id_agent','id_operacao','valor')
+        #nesse caso, o id_agent sera obtido atravez do token de autenticacao do usuario
+        fields=('id','id_operacao')
 
 class Temp_LevantamentoSerializer(serializers.ModelSerializer):
     class Meta:
         model=Temp_Levantamento
-        fields=('id','id_agent','id_operacao','valor')
+        fields=('id','id_agent','id_operacao')
 
 class Temp_TransferenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model=Temp_Transferencia
-        fields=('id','id_agent','id_operacao','valor','numero_conta')
+        fields=('id','id_agent','id_operacao','numero_conta')
 

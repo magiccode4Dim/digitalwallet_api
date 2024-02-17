@@ -18,6 +18,9 @@ import cliente
 import django
 from conta.serializer import *
 from conta.models import *
+from operacao.views import userIsAgentOrClient
+from deposito.views import transation_Deposit
+from operacao.models import Operacao
 # Create your views here.
 
 #FUNCOES AUXILIARES - INICIO
@@ -165,4 +168,50 @@ class otp_client_account_validation(APIView):
             return Response({"message":f"Congrats! Your have new Account number is {newConta.numero}"},status=status.HTTP_200_OK)
         else:
             return Response({"error":"we had some problem with this validation"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+#Validacao de uma operacao de Deposito
+class otp_deposit_validation(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
+    def post(self, request):
+        #Verifica se o OPT é um numero
+        try:
+            otp_code = int(request.data.get('otp_code'))
+        except ValueError as e:
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        #verifica se o usuario é um agente
+        id_user = request.user.id
+        res = userIsAgentOrClient(id_user)
+        if(not res[0]):
+            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        elif(res[0] and res[1]=='client'):
+            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        #VERIFICA SE O CODIGO OTP ENVIADO É VALIDO
+        otp_temp = operacaoOPT.objects.filter(optcode=otp_code).first()
+        if(otp_temp == None):
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        
+        #busca o deposito temporario
+        temp_depo = Temp_Deposito.objects.get(id=otp_temp.id_temp)
+        
+        #verifica se o agente que esta a validar o deposito é o dono do deposito
+        if temp_depo.id_agent != res[2].id:
+            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        #busca a operacao desse deposito
+        opera = Operacao.objects.get(id=temp_depo.id_operacao)
+        contaCli = opera.id_conta
+        
+        try:
+            trans_res = transation_Deposit(res[2],opera,contaCli,temp_depo,otp_temp)
+            #isso significa que o deposito ocorreu com sucesso
+            return Response({"message":f"{trans_res}"},status=status.HTTP_200_OK)
+        except Exception as e:
+            #quando accontece algum erro que faz com que a transacao nao seja realizada
+            return Response({"error":f"{str(e)}"},status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+        
         
