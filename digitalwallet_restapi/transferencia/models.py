@@ -7,6 +7,6 @@ from operacao.models import Operacao
 class Transferencia(models.Model):
     id = models.AutoField(primary_key=True)
     id_agent = models.ForeignKey(Agente, on_delete=models.CASCADE)
-    id_operacao = models.ForeignKey(Operacao, on_delete=models.CASCADE,unique=True)
+    id_operacao = models.OneToOneField(Operacao, on_delete=models.CASCADE)
     numero_conta = models.CharField(max_length=100)
     
