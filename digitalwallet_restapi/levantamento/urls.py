@@ -6,5 +6,5 @@ from .views import *
 app_name = 'levantamento'
 
 urlpatterns = [
-
+    path('register',Register.as_view(),name="RegisterDeposito") 
 ]

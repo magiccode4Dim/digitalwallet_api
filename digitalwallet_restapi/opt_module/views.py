@@ -19,6 +19,7 @@ import django
 from conta.serializer import *
 from conta.models import *
 from operacao.views import userIsAgentOrClient
+from levantamento.views import transation_Levantament
 from deposito.views import transation_Deposit
 from operacao.models import Operacao
 from django.db import transaction
@@ -191,9 +192,9 @@ class otp_deposit_validation(APIView):
         id_user = request.user.id
         res = userIsAgentOrClient(id_user)
         if(not res[0]):
-            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
         elif(res[0] and res[1]=='client'):
-            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
         
         #VERIFICA SE O CODIGO OTP ENVIADO É VALIDO
         otp_temp = operacaoOPT.objects.filter(optcode=otp_code).first()
@@ -205,7 +206,7 @@ class otp_deposit_validation(APIView):
         
         #verifica se o agente que esta a validar o deposito é o dono do deposito
         if temp_depo.id_agent != res[2].id:
-            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
         
         #busca a operacao desse deposito
         opera = Operacao.objects.get(id=temp_depo.id_operacao)
@@ -214,12 +215,56 @@ class otp_deposit_validation(APIView):
         try:
             trans_res = transation_Deposit(res[2],opera,contaCli,temp_depo,otp_temp)
             #isso significa que o deposito ocorreu com sucesso
+            #DEVE MANDAR UMA MENSAGEM PARA O CLIENTE INFORMANDO SOBRE A OPERAÇÃO
             return Response({"message":f"{trans_res}"},status=status.HTTP_200_OK)
         except Exception as e:
             #quando accontece algum erro que faz com que a transacao nao seja realizada
             return Response({"error":f"{str(e)}"},status=status.HTTP_400_BAD_REQUEST)
         
+#Validação de OPeração de Levantamento
+class otp_levantament_validation(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
+    def post(self, request):
+        #Verifica se o OPT é um numero
+        try:
+            otp_code = int(request.data.get('otp_code'))
+        except ValueError as e:
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        #verifica se o usuario é um cliente
+        id_user = request.user.id
+        res = userIsAgentOrClient(id_user)
+        if(not res[0]):
+            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        elif(res[0] and res[1]=='agent'):
+            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
         
+        #VERIFICA SE O CODIGO OTP ENVIADO É VALIDO
+        otp_temp = operacaoOPT.objects.filter(optcode=otp_code).first()
+        if(otp_temp == None):
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        
+        #busca o levantamento temporario
+        temp_levant = Temp_Levantamento.objects.get(id=otp_temp.id_temp)
+        
+        #busca a operacao desse levantamento
+        opera = Operacao.objects.get(id=temp_levant.id_operacao)
+        
+        #verifica se essa operacao de levantamento que esta a ser confirmada, esta a ocorrer em uma conta que pertence ao cliente
+        if opera.id_conta.id_client.id != res[2].id:
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        contaCli = opera.id_conta
+        agent = Agente.objects.get(id=temp_levant.id_agent)
+        
+        try:
+            trans_res = transation_Levantament(agent,opera,contaCli,temp_levant,otp_temp)
+            #isso significa que o levantamento ocorreu com sucesso
+            #DEVE MANDAR UMA MENSAGEM PARA O CLIENTE INFORMANDO SOBRE A OPERAÇÃO
+            return Response({"message":f"{trans_res}"},status=status.HTTP_200_OK)
+        except Exception as e:
+            #quando accontece algum erro que faz com que a transacao nao seja realizada
+            return Response({"error":f"{str(e)}"},status=status.HTTP_400_BAD_REQUEST)
         
         
         

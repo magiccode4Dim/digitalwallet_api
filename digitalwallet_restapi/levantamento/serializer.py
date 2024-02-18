@@ -4,4 +4,4 @@ from .models import Levantamento
 class LevantamentoSerializer(serializers.ModelSerializer):
     class Meta:
         model=Levantamento
-        fields=('id','id_agent','id_operacao','valor')
+        fields=('id','id_agent','id_operacao')
