@@ -56,5 +56,5 @@ class Temp_LevantamentoSerializer(serializers.ModelSerializer):
 class Temp_TransferenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model=Temp_Transferencia
-        fields=('id','id_agent','id_operacao','numero_conta')
+        fields=('id','id_operacao','numero_conta')
 

@@ -17,6 +17,11 @@ def mensagem_de_confirmacao_de_levantamento(cell,nomecliente,nomeagente,codigoag
     conteudo = f"Ewallet - Caro {nomecliente}, registramos um levantamento no agente {codigoagente} - {nomeagente}, no valor de {valor} MT, na conta {numeroconta}, na data {datalevantamento}. Confirme a Operação com o código {optcode}. Caso desconheça essa operação entre em contacto connosco."
     return '{"cell":"'+str(cell)+'","message":"'+str(conteudo)+'"}'
 
+def mensagem_de_confirmacao_de_transferencia(cell,nomecliente,valor,numerocontadestion,donocontadestion,datatransferencia,optcode):
+    conteudo = f"Ewallet - Caro {nomecliente}, registramos uma transferencia para a conta {numerocontadestion} de {donocontadestion}, no valor de {valor} MT, na data {datatransferencia}. Confirme a Operação com o código {optcode}. Caso desconheça essa operação entre em contacto connosco."
+    return '{"cell":"'+str(cell)+'","message":"'+str(conteudo)+'"}'
+
+
 def mensagem_de_validacao_de_transacao(optcode,cell,idtransacao):
     #em desenvolvimento...
     return ""

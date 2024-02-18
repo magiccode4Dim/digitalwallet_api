@@ -61,6 +61,5 @@ class Temp_Levantamento(models.Model):
     
 class Temp_Transferencia(models.Model):
     id = models.AutoField(primary_key=True)
-    id_agent = models.IntegerField()
     id_operacao = models.IntegerField(unique=True)
     numero_conta = models.CharField(max_length=100)

@@ -19,8 +19,9 @@ import django
 from conta.serializer import *
 from conta.models import *
 from operacao.views import userIsAgentOrClient
-from levantamento.views import transation_Levantament
+from transferencia.views import transation_Transferencia
 from deposito.views import transation_Deposit
+from levantamento.views import transation_Levantament
 from operacao.models import Operacao
 from django.db import transaction
 # Create your views here.
@@ -170,6 +171,11 @@ class otp_client_account_validation(APIView):
             #Se nao for valido, não há como, o utilizador terá que abrir a conta novamente
             return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
         
+        #verifica se a conta que estou prestes a validar pertence ao usuario
+        temp_conta = Temp_Conta.objects.get(id=otp_temp.id_temp)
+        if temp_conta.id_client != cli.id:
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        
         #SE TUDO ESTIVER CERTO, MOVE A NOVA CONTA PARA A TABELA CERTA
         #Nesse caso, o ID_temp, fara um link com as contas que estiverem presas na tabela temporaria sem validação
         try:
@@ -266,5 +272,55 @@ class otp_levantament_validation(APIView):
             #quando accontece algum erro que faz com que a transacao nao seja realizada
             return Response({"error":f"{str(e)}"},status=status.HTTP_400_BAD_REQUEST)
         
+        
+#Validação de Operação de Transferencia
+class otp_transferenc_validation(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
+    def post(self, request):
+        #Verifica se o OPT é um numero
+        try:
+            otp_code = int(request.data.get('otp_code'))
+        except ValueError as e:
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        #verifica se o usuario é um cliente
+        id_user = request.user.id
+        res = userIsAgentOrClient(id_user)
+        if(not res[0]):
+            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        elif(res[0] and res[1]=='agent'):
+            return Response({"erro":"acess denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        #VERIFICA SE O CODIGO OTP ENVIADO É VALIDO
+        otp_temp = operacaoOPT.objects.filter(optcode=otp_code).first()
+        if(otp_temp == None):
+            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        #busca o transferecnia temporaria
+        temp_transf = Temp_Transferencia.objects.get(id=otp_temp.id_temp)
+        
+        #busca a operacao dessa transferencia
+        opera = Operacao.objects.get(id=temp_transf.id_operacao)
+        
+        #verifica se essa operacao de transferencia que esta a ser confirmada, esta a ocorrer em uma conta que pertence ao cliente
+        if opera.id_conta.id_client.id != res[2].id:
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        #verifica se a conta de destino existe
+        contaDestino = Conta.objects.filter(numero=temp_transf.numero_conta).first()
+        if contaDestino==None:
+            return Response({"error":"numero_conta not found"},status=status.HTTP_404_NOT_FOUND)
+        
+        contaCli = opera.id_conta
+        
+        try:
+            trans_res = transation_Transferencia(contaCli,contaDestino,opera,temp_transf,otp_temp)
+            #isso significa que a transferencia ocorreu com sucesso
+            #DEVE MANDAR UMA MENSAGEM PARA O CLIENTE INFORMANDO SOBRE A OPERAÇÃO
+            return Response({"message":f"{trans_res}"},status=status.HTTP_200_OK)
+        except Exception as e:
+            #quando accontece algum erro que faz com que a transacao nao seja realizada
+            return Response({"error":f"{str(e)}"},status=status.HTTP_400_BAD_REQUEST)
         
         
