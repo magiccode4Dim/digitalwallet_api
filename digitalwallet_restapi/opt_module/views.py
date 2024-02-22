@@ -24,6 +24,8 @@ from deposito.views import transation_Deposit
 from levantamento.views import transation_Levantament
 from operacao.models import Operacao
 from django.db import transaction
+from opt_module.messageGenerator import *
+from opt_module.myOtp import send_messages
 # Create your views here.
 
 #FUNCOES AUXILIARES - INICIO
@@ -222,6 +224,13 @@ class otp_deposit_validation(APIView):
             trans_res = transation_Deposit(res[2],opera,contaCli,temp_depo,otp_temp)
             #isso significa que o deposito ocorreu com sucesso
             #DEVE MANDAR UMA MENSAGEM PARA O CLIENTE INFORMANDO SOBRE A OPERAÇÃO
+            mfg = mensagem_deposito_feito_para_agente(res[2].celular,contaCli.numero,opera.valor,
+                                                opera.data_operacao
+                                                ,contaCli.id_client.id_user.first_name+" "+contaCli.id_client.id_user.last_name,res[2].saldo)
+            send_messages(mfg)
+            mfc =  mensagem_deposito_feito_para_cliente(contaCli.id_client.celular,contaCli.numero,opera.valor,
+                                                        opera.data_operacao,res[2].id_user.first_name+" "+res[2].id_user.last_name,res[2].id,contaCli.saldo)
+            send_messages(mfc)
             return Response({"message":f"{trans_res}"},status=status.HTTP_200_OK)
         except Exception as e:
             #quando accontece algum erro que faz com que a transacao nao seja realizada
@@ -267,6 +276,12 @@ class otp_levantament_validation(APIView):
             trans_res = transation_Levantament(agent,opera,contaCli,temp_levant,otp_temp)
             #isso significa que o levantamento ocorreu com sucesso
             #DEVE MANDAR UMA MENSAGEM PARA O CLIENTE INFORMANDO SOBRE A OPERAÇÃO
+            mfg =  mensagem_levantamento_feito_para_agente(agent.celular,contaCli.numero,opera.valor,opera.data_operacao,
+                                                           res[2].id_user.first_name+" "+res[2].id_user.last_name,agent.saldo)
+            send_messages(mfg)
+            mfc = mensagem_levantamento_feito_para_cliente(res[2].celular,contaCli.numero,opera.valor,opera.data_operacao,
+                                                           agent.id_user.first_name+" "+agent.id_user.last_name,agent.id,contaCli.saldo)
+            send_messages(mfc)
             return Response({"message":f"{trans_res}"},status=status.HTTP_200_OK)
         except Exception as e:
             #quando accontece algum erro que faz com que a transacao nao seja realizada
@@ -318,6 +333,14 @@ class otp_transferenc_validation(APIView):
             trans_res = transation_Transferencia(contaCli,contaDestino,opera,temp_transf,otp_temp)
             #isso significa que a transferencia ocorreu com sucesso
             #DEVE MANDAR UMA MENSAGEM PARA O CLIENTE INFORMANDO SOBRE A OPERAÇÃO
+            mfo = mensagem_transferencia_feita_cliente_origem(res[2].celular,opera.valor,contaDestino.numero,
+                                                              contaDestino.id_client.id_user.first_name+" "+contaDestino.id_client.id_user.last_name,opera.data_operacao,
+                                                              contaCli.saldo,contaCli.numero
+                                                              )
+            send_messages(mfo)
+            mfd = mensagem_transferencia_feita_cliente_destino(contaDestino.id_client.celular,opera.valor,contaDestino.numero,
+                                                               res[2].id_user.first_name+" "+res[2].id_user.last_name,opera.data_operacao,contaDestino.saldo)
+            send_messages(mfd)
             return Response({"message":f"{trans_res}"},status=status.HTTP_200_OK)
         except Exception as e:
             #quando accontece algum erro que faz com que a transacao nao seja realizada
