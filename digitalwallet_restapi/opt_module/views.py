@@ -101,7 +101,7 @@ class otp_account_validation(APIView):
         try:
             id_user = int(request.data.get('id_user'))
             otp_code = int(request.data.get('otp_code'))
-        except ValueError as e:
+        except Exception as e:
             return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
         #Verificar se opt existe
         otp_temp = accontValidationOTP.objects.filter(id_user=id_user,optcode=otp_code).first()
@@ -157,7 +157,7 @@ class otp_client_account_validation(APIView):
         #antes de mais nada, verifica se os dados sao validos
         try:
             otp_code = int(request.data.get('otp_code'))
-        except ValueError as e:
+        except Exception as e:
             return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
         
         id_user = request.user.id
@@ -194,7 +194,7 @@ class otp_deposit_validation(APIView):
         #Verifica se o OPT é um numero
         try:
             otp_code = int(request.data.get('otp_code'))
-        except ValueError as e:
+        except Exception as e:
             return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
         #verifica se o usuario é um agente
         id_user = request.user.id
@@ -244,7 +244,7 @@ class otp_levantament_validation(APIView):
         #Verifica se o OPT é um numero
         try:
             otp_code = int(request.data.get('otp_code'))
-        except ValueError as e:
+        except Exception as e:
             return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
         #verifica se o usuario é um cliente
         id_user = request.user.id
@@ -296,7 +296,7 @@ class otp_transferenc_validation(APIView):
         #Verifica se o OPT é um numero
         try:
             otp_code = int(request.data.get('otp_code'))
-        except ValueError as e:
+        except Exception as e:
             return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
         #verifica se o usuario é um cliente
         id_user = request.user.id
