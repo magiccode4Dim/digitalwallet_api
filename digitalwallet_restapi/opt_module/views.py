@@ -44,7 +44,7 @@ def getTempUserPhoneNumber(id_user):
 
 #Move dados das tabelaS Temporarias Agente ou Cliente
 @transaction.atomic
-def moveClientOrAgentetoMainDB(user,otp_temp):
+def moveClientOrAgentetoMainDB(user,otp_temp,token):
     #Activa o usuario
     user.is_active=True
     user.save()
@@ -63,6 +63,9 @@ def moveClientOrAgentetoMainDB(user,otp_temp):
     #para agentes
     tempAgents = Temp_Agente.objects.filter(id_user=user.id)
     if(tempAgents!=None):
+        #verifica se o token que o utilizador enviou para abrir a conta agente é valido ou não
+        if tempAgents.first().token != token:
+            raise Exception("A Chave de activação da Conta-Agente é Invalida. Contacte o Administrador.")
         tempAgentSer = Temp_AgenteSerializer(tempAgents.first(),many=False)
         AgentSer =  AgenteSerializer(data=tempAgentSer.data, many=False)
         if AgentSer.is_valid():
@@ -101,8 +104,10 @@ class otp_account_validation(APIView):
         try:
             id_user = int(request.data.get('id_user'))
             otp_code = int(request.data.get('otp_code'))
+            #se o usuario que estiver a ser validado for uma gente, para além dos dados acima, vai ser receber tambem um token
+            token = request.data.get('token')
         except Exception as e:
-            return Response({"error":"invalid otp_code"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error":"invalid otp_code or id_user"},status=status.HTTP_400_BAD_REQUEST)
         #Verificar se opt existe
         otp_temp = accontValidationOTP.objects.filter(id_user=id_user,optcode=otp_code).first()
         try:
@@ -143,7 +148,7 @@ class otp_account_validation(APIView):
         #a conta vai ser activada e os dados da tabela temporaria irao para a tabela definitiva
         
         try :
-            moveClientOrAgentetoMainDB(user,otp_temp)#move de uma base de dados para outra
+            moveClientOrAgentetoMainDB(user,otp_temp,token)#move de uma base de dados para outra
             return Response({"message":"Congrats! Your Accont is valid rigth now"},status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error":str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)

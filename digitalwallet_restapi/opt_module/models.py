@@ -36,6 +36,7 @@ class Temp_Agente(models.Model):
     id_user = models.IntegerField(unique=True)
     saldo = models.FloatField(default=0.0)
     celular = models.CharField(max_length=13,default='')
+    token = models.CharField(max_length=45,unique=True)
 
 class Temp_Cliente(models.Model):
     id = models.AutoField(primary_key=True)

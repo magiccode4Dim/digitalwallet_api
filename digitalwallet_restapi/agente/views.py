@@ -21,6 +21,7 @@ import django
 import agente
 from django.db import transaction
 from cliente.models import Cliente
+from opt_module.optcodeGenerator import generate_random_key
 
 # Create your views here.
 
@@ -159,7 +160,9 @@ class Register(APIView):
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um para obtenção do token
     def post(self, request):
         #INICIALIZA OS DADOS EM UM SERIALIZADOR DA BASE DE DADOS TEMPORARIA
-        newAgent = Temp_AgenteSerializer(data=request.data)
+        data = request.data
+        data["token"] = generate_random_key([Agente.objects.all(),Temp_Agente.objects.all()])
+        newAgent = Temp_AgenteSerializer(data=data)
         if newAgent.is_valid():
             id_user = request.data.get('id_user')
             cell = request.data.get('celular')
@@ -191,6 +194,7 @@ class Register(APIView):
             send_messages(otpmessage)
             #salva o agente na tabela provisoria antes de bazar para a principal
             newAgent.save()
+            
              
             
             return Response({"message":"O codigo de confirmacao foi enviado ao seu contacto"},status=status.HTTP_201_CREATED)

@@ -30,7 +30,7 @@ class accontValidateOPTSerializer(serializers.ModelSerializer):
 class Temp_AgenteSerializer(serializers.ModelSerializer):
     class Meta:
         model=Temp_Agente
-        fields=('id','id_user','saldo','celular')
+        fields=('id','id_user','saldo','celular','token')
 
 class Temp_ClienteSerializer(serializers.ModelSerializer):
     class Meta:

@@ -28,7 +28,10 @@ class Login(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         # Autenticar o usuário
-        user = authenticate(username=username, password=password)
+        try:
+            user = authenticate(username=username, password=password)
+        except Exception:
+            return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_400_BAD_REQUEST)
         if user:
             try:
                 #cria o token
