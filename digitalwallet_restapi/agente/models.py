@@ -8,6 +8,11 @@ class Agente(models.Model):
     saldo = models.FloatField(default=0.0)
     celular = models.CharField(max_length=13,default='')
     
+    #deve ser acrescentado um campo, relativo ao codigo que sera fornecido exclusivamente ao agente
+    #no ambito da abertura da sua conta na loja. Neste contexto, ao validar uma conta agente,
+    # o agente nao so tera que passar o codigo otp como tambem tera que introduzir o token indicado pelo administrador do
+    #sistema
+    
 
 
 

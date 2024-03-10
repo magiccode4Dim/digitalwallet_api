@@ -18,20 +18,141 @@ from django.contrib.auth.models import User
 import random
 from opt_module.serializer import *
 import django
+import agente
+from django.db import transaction
+from cliente.models import Cliente
 
 # Create your views here.
 
 #DEVO COLOCAR PERMISSOES PARA A CHAMADA DE DETERMINADAS URLS
 # Permitir acesso a apenas os que estiverem autenticados nao importa quem é
 #Autenticacao para ver a view, significa que devo passar o token
+#ADMIN, CLIENT (limited-data)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request):
-    data = Agente.objects.all()
-    serializer = AgenteSerializer(data, many=True)
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = Agente.objects.all()
+        serializer = AgenteSerializer(data, many=True)
+        return Response(serializer.data)
+    #se a pessoa é um cliente simples, vai receber apenas alguns dados
+    client =  Cliente.objects.filter(id_user=user.id).first()
+    if client!=None:
+        data = Agente.objects.all()
+        serializer = AgenteSerializer(data, many=True)
+        limited_list =  list()
+        for a in serializer.data:
+            a.pop("saldo")
+            a.pop("celular")
+            limited_list.append(a)
+        return Response(limited_list)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    #OS UTILIZADORES TAMBEM DEVEM TER ACESSO A LISTA DE AGENTES, PARA QUE POSSA FUNCIONAR A FUNCIONALIDADE DE AUTO_COMPLIT
+    #SE FOREM UTILIZADORES SIMPLES, ELES PODERAM VER SOMENTE UMA LISTA COM O NOME E CODIGO DO AGENTE.
+
+#retorna somente 1 agente
+#ADMIN, AGENT(id==id_agent)
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get(request,id_agent):
+    try:
+        id_agent = int(id_agent)
+    except Exception as e:
+        return Response({"error":"invalid id_agent"},status=status.HTTP_400_BAD_REQUEST)
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    agent = Agente.objects.filter(id_user=user.id).first()
+    #verifica se a pessoa é superuser ou se se trata-se do agente que busca dados sobre a sua conta
+    if not user.is_superuser and agent!=None:
+        if agent.id != id_agent:
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    elif not user.is_superuser and agent==None:
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    try:
+        data = Agente.objects.get(id=id_agent)
+    except agente.models.Agente.DoesNotExist as e:
+        return Response({"erro":"Not found"}, status=status.HTTP_404_NOT_FOUND)
+    serializer = AgenteSerializer(data, many=False)
     return Response(serializer.data)
 
+#verifica se o numero de telefone é valido
+def IsphoneNumberValid(cell):
+    #Only Mozambican Phone Number Prefix
+    if cell == None:
+        return False
+    if cell[0:6] in ['+25882','+25883','+25884','+25885','+25886','+25887']:
+        if len(cell[6:])==7:
+            try:
+                v = int(cell[6:])
+                return True
+            except ValueError:
+                return False
+    return False
+
+
+#altera os dados de uma agente (somente o numero de telefone)
+#AGENT(id==id_agent) 
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def updateAgenPhoneNumber(request):
+    cell = request.data.get('cell')
+    #Deve verificar o numero de telefone é valido... ainda é necessario escrever o metodo
+    if(not IsphoneNumberValid(cell)):
+        return Response({"error":"invalid invalid cell"},status=status.HTTP_400_BAD_REQUEST)
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    agent = Agente.objects.filter(id_user=user.id).first()
+    #verifica se a pessoa é um agente 
+    if agent==None:
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    agent.celular = cell
+    agent.save()
+    return Response({"update":f"new cell is {cell}"},status=status.HTTP_201_CREATED)
+
+#recarrega a conta do agente
+#ADMIN
+
+#transacao para aumentar o saldo do agente
+@transaction.atomic
+def aumentarsaldoAgente(agent:Agente,valor:float):
+    agent.saldo+=valor
+    agent.save()
+    
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def addAgentSaldo(request):
+    #deve verificar se é um administrador para aumentar o saldo
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    if not user.is_superuser:
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    #verifica se dos dados inseridos estao correctos
+    try:
+        valor = float(request.data.get('valor'))
+        id_agent = int(request.data.get('id_agent'))
+        agent = Agente.objects.get(id=id_agent)
+    except ValueError:
+        return Response({"error":"invalid valor or id_agent"},status=status.HTTP_400_BAD_REQUEST)
+    except TypeError:
+        return Response({"error":"invalid valor or id_agent"},status=status.HTTP_400_BAD_REQUEST)
+    except agente.models.Agente.DoesNotExist as e:
+        return Response({"erro":"Agent Not found"}, status=status.HTTP_404_NOT_FOUND)
+    try:
+        aumentarsaldoAgente(agent,valor)
+        return Response({"update":f"success"},status=status.HTTP_201_CREATED)
+    except Exception:
+        return Response({"error":"operation failed"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
 #Criar uma agente...
 class Register(APIView):
     authentication_classes = [TokenAuthentication]
@@ -41,6 +162,10 @@ class Register(APIView):
         newAgent = Temp_AgenteSerializer(data=request.data)
         if newAgent.is_valid():
             id_user = request.data.get('id_user')
+            cell = request.data.get('celular')
+            #verifica se o numero de celular é Valido
+            if(not IsphoneNumberValid(cell)):
+                return Response({"error":"invalid cell"},status=status.HTTP_400_BAD_REQUEST)
             #deve verificar se este usuario esta associado a um usuario ou se esta associado a uma conta cliente
             try:
                 user =  User.objects.get(id=id_user)
