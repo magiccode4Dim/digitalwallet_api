@@ -15,6 +15,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.contrib.auth.hashers import check_password
 
 #cria um novo token para um utilizador
 def recriar_token_utilizador(user):
@@ -104,19 +105,66 @@ def updateUser(user_to_update:User):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def update(request):
-    pass
+    id_user = request.user.id
+    user = User.objects.get(id=id_user)
+    try:
+        id = int(request.data.get('id'))
+    except ValueError:
+        return Response({"error": "Invalid id"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if id != id_user:
+        return Response({"error": "Access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    #nao posso permitir que esses dois atributos sejam alterados
+    refusedAtt = ['username', 'password']
+    for att in refusedAtt:
+        if att in request.data:
+            return Response({"error": "you can't change username or password"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = UserSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        try:
+            updateUser(serializer)
+            return Response({"message": "Success"}, status=status.HTTP_202_ACCEPTED)
+        except Exception:
+            return Response({'error': 'unsucess'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 #USER (id=id)
+@transaction.atomic
+def change_pass(user, new_password):
+    user.set_password(new_password)
+    user.save()
+    token = recriar_token_utilizador(user)
+    return token
+
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def change_password(request):
+    id_user = request.user.id
+    user = User.objects.get(id=id_user)
     #nao pode permitir a alteracao de passwords para admin ou staff
-    #deve fazer a verificacao OTP ou Email caso seja um Agente ou Cliente
-    pass
-
-
+    if user.is_superuser or user.is_staff:
+            return Response({"erro":"invalid iduser"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    #pega a antiga e a nova password e verifica se elas sao validas
+    new_password = request.data.get('new_password')
+    old_password= request.data.get('old_password')
+    
+    if new_password==None or old_password==None:
+        return Response({"erro":"new_password and old_password is required"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    
+    if(not check_password(old_password,user.password)):
+        return Response({"erro":"invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        #se a senha é alterada, entao o token também é
+        token = change_pass(user,new_password)
+        return Response({"message": "Success","token":token.key}, status=status.HTTP_202_ACCEPTED)
+    except Exception:
+        return Response({'error': 'unsucess'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 #Se as credencias forem validas, um token de sessao será retornado
 class Login(APIView):
     authentication_classes = [TokenAuthentication]

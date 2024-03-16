@@ -11,5 +11,6 @@ urlpatterns = [
     path('get/<int:id_user_to_get>',get,name="get"),
     path('delete/<int:id_user_to_delete>',delete,name="delete"),
     path('update',update,name="update"),
+    path('change_password',change_password,name="change_password"),
     path('getall',getAll,name="getall"),
 ]
