@@ -49,6 +49,7 @@ def getAll(request):
         for a in serializer.data:
             a.pop("saldo")
             a.pop("celular")
+            a.pop("token")
             limited_list.append(a)
         return Response(limited_list)
     return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -57,11 +58,12 @@ def getAll(request):
     #SE FOREM UTILIZADORES SIMPLES, ELES PODERAM VER SOMENTE UMA LISTA COM O NOME E CODIGO DO AGENTE.
 
 #retorna somente 1 agente
-#ADMIN, AGENT(id==id_agent)
+#ADMIN, AGENT(id==id_agent), CLIENT (limited-data)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get(request,id_agent):
+    cli =  None
     try:
         id_agent = int(id_agent)
     except Exception as e:
@@ -74,14 +76,25 @@ def get(request,id_agent):
         if agent.id != id_agent:
             return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
     elif not user.is_superuser and agent==None:
-        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
-    
+        #Verifica-se se a pessoa é um cliente
+        cli = Cliente.objects.filter(id_user=user.id).first()
+        if cli == None:
+            #se  pessoa não for um cliente
+            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
     try:
         data = Agente.objects.get(id=id_agent)
     except agente.models.Agente.DoesNotExist as e:
         return Response({"erro":"Not found"}, status=status.HTTP_404_NOT_FOUND)
     serializer = AgenteSerializer(data, many=False)
-    return Response(serializer.data)
+    if cli!=None:
+        #retorna dados limitados
+        limitedData = serializer.data
+        limitedData.pop("saldo")
+        limitedData.pop("celular")
+        limitedData.pop("token")
+        return Response(limitedData)
+    else:
+        return Response(serializer.data)
 
 #verifica se o numero de telefone é valido
 def IsphoneNumberValid(cell):
@@ -162,6 +175,7 @@ class Register(APIView):
         #INICIALIZA OS DADOS EM UM SERIALIZADOR DA BASE DE DADOS TEMPORARIA
         data = request.data
         data["token"] = generate_random_key([Agente.objects.all(),Temp_Agente.objects.all()])
+        data["saldo"] = 0.0
         newAgent = Temp_AgenteSerializer(data=data)
         if newAgent.is_valid():
             id_user = request.data.get('id_user')
@@ -174,6 +188,9 @@ class Register(APIView):
                 user =  User.objects.get(id=id_user)
                 #deve vericar se o usuario ja esta activado, porque nao pode permitir que este tenha 2 contas agente ou cliente
                 if user.is_active:
+                    return Response({"erro":"invalid iduser"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                #verifica se o usuario é um administrador, porque administradores nao podem ter contas cliente ou agente
+                if user.is_superuser or user.is_staff:
                     return Response({"erro":"invalid iduser"}, status=status.HTTP_406_NOT_ACCEPTABLE)
             except django.contrib.auth.models.User.DoesNotExist:
                 return Response({"erro":"iduser not found"}, status=status.HTTP_404_NOT_FOUND)

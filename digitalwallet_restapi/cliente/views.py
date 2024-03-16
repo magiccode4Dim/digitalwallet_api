@@ -31,6 +31,9 @@ class Register(APIView):
                 user =  User.objects.get(id=id_user)
                 if user.is_active:
                     return Response({"erro":"invalid iduser"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                #verifica se o usuario é um administrador, porque administradores nao podem ter contas cliente ou agente
+                if user.is_superuser or user.is_staff:
+                    return Response({"erro":"invalid iduser"}, status=status.HTTP_406_NOT_ACCEPTABLE)
             except django.contrib.auth.models.User.DoesNotExist:
                 return Response({"erro":"iduser not found"}, status=status.HTTP_404_NOT_FOUND)
             avOPT =  accontValidateOPTSerializer(data={

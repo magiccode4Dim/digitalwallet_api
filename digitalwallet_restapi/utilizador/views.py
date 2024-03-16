@@ -11,6 +11,10 @@ from .serializer import UserSerializer
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import status
 from opt_module.models import accontValidationOTP,operacaoOPT
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth.models import User
+from django.db import transaction
 
 #cria um novo token para um utilizador
 def recriar_token_utilizador(user):
@@ -18,6 +22,100 @@ def recriar_token_utilizador(user):
     token.delete()
     new_token = Token.objects.create(user=user)
     return new_token
+
+#ADMIN
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAll(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados de todos os utilizadores
+    if user.is_superuser:
+        data = User.objects.all()
+        serializer = UserSerializer(data, many=True)
+        #remove as senhas
+        users =  []
+        for u in serializer.data:
+            u.pop("password")
+            users.append(u)
+        return Response(users)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+#ADMIN, AGENT(limited-data), CLIENT(limited-data)
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get(request,id_user_to_get):
+    try:
+        id_user_to_get = int(id_user_to_get)
+        user_to_get = User.objects.get(id=id_user_to_get)
+    except Exception as e:
+        return Response({"error":"invalid id_user"},status=status.HTTP_400_BAD_REQUEST)
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    serializer = UserSerializer(user_to_get, many=False)    
+    limitedData = serializer.data
+    limitedData.pop("password")
+    if user.is_superuser:
+        #se a usuario autenticado for administrador, vai se retornar todos os dados menos a senha  
+        return Response(limitedData)
+    else:
+        #os emails nao podem estar expostos para todos, excepto se a conta for minha
+        if user_to_get.id != user.id:
+            limitedData.pop("email")
+        #se o usuario autenticado nao for administrador vai se retornar todos os dados menos a senha excepto quando o usuario procura é administador ou staf
+        if user_to_get.is_superuser or user_to_get.is_staff:
+            #nao pode permitir que clientes ou agentes vejam os perfis de administração do sistema
+            return Response({"error":"invalid id_user"},status=status.HTTP_400_BAD_REQUEST)
+        return Response(limitedData)
+
+#ADMIN
+#transacao para apagar um usuario
+@transaction.atomic
+def deleteUser(user_to_delete:User):
+    user_to_delete.delete()
+
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete(request,id_user_to_delete):
+    try:
+        id_user_to_delete = int(id_user_to_delete)
+        user_to_delete = User.objects.get(id=id_user_to_delete)
+    except Exception as e:
+        return Response({"error":"invalid id_user"},status=status.HTTP_400_BAD_REQUEST)
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    if user.is_superuser:
+        try:
+            deleteUser(user_to_delete=user_to_delete)
+            return Response({"message":f"deleted user {id_user_to_delete}"},status=status.HTTP_202_ACCEPTED)
+        except Exception:
+            return Response({"error":f"failed to delete {id_user_to_delete}"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response({"error":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+#USER (id=id)
+@transaction.atomic
+def updateUser(user_to_update:User):
+    user_to_update.save()
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update(request):
+    pass
+    
+
+#USER (id=id)
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    #nao pode permitir a alteracao de passwords para admin ou staff
+    #deve fazer a verificacao OTP ou Email caso seja um Agente ou Cliente
+    pass
+
 
 #Se as credencias forem validas, um token de sessao será retornado
 class Login(APIView):

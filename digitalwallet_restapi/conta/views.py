@@ -33,6 +33,7 @@ class Register(APIView):
         data = request.data
         data["id_client"] = cli.id
         data["numero"] = generate_unique_numconta(Conta.objects.all())
+        data["saldo"] = 0.0
         newConta =  Temp_ContaSerializer(data=data)
         if newConta.is_valid():
             #deve salvar a conta primeiro porque, é necessário ter o id da conta para poder vincular a conta temporaria a operacção OPT
