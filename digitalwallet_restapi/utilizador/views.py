@@ -43,6 +43,21 @@ def getAll(request):
         return Response(users)
     return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
 
+#USER (id=id)
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getMy(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    if user!=None:
+        serializer = UserSerializer(user, many=False)
+        s = serializer.data
+        s.pop("password")
+        return Response(s)
+    else:
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
 #ADMIN, AGENT(limited-data), CLIENT(limited-data)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -119,7 +134,7 @@ def update(request):
     refusedAtt = ['username', 'password']
     for att in refusedAtt:
         if att in request.data:
-            return Response({"error": "you can't change username or password"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "invalid operation"}, status=status.HTTP_400_BAD_REQUEST)
     
     serializer = UserSerializer(user, data=request.data, partial=True)
     if serializer.is_valid():

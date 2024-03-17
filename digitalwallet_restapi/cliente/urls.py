@@ -6,5 +6,9 @@ from .views import *
 app_name = 'cliente'
 
 urlpatterns = [
-    path('register',Register.as_view(),name="RegisterClient")
+    path('register',Register.as_view(),name="RegisterClient"),
+    path('update',update,name="update"),
+    path('getall',getAll,name="getall"),
+    path('get/<int:id_client>',get,name="get"),
+    path('get',getMy,name="getMy"),
 ]

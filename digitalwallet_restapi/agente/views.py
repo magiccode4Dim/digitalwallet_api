@@ -1,7 +1,5 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -46,10 +44,11 @@ def getAll(request):
         data = Agente.objects.all()
         serializer = AgenteSerializer(data, many=True)
         limited_list =  list()
+        #atributos que nao devem ser expostos
+        refusedAtt = ['saldo', 'celular','token']
         for a in serializer.data:
-            a.pop("saldo")
-            a.pop("celular")
-            a.pop("token")
+            for r in refusedAtt:
+                a.pop(r)
             limited_list.append(a)
         return Response(limited_list)
     return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -58,6 +57,21 @@ def getAll(request):
     #SE FOREM UTILIZADORES SIMPLES, ELES PODERAM VER SOMENTE UMA LISTA COM O NOME E CODIGO DO AGENTE.
 
 #retorna somente 1 agente
+#AGENT(id==id_agent)
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getMy(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    agent = Agente.objects.filter(id_user=user.id).first()
+    if agent!=None:
+        serializer = AgenteSerializer(agent, many=False)
+        return Response(serializer.data)
+    else:
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 #ADMIN, AGENT(id==id_agent), CLIENT (limited-data)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -89,9 +103,10 @@ def get(request,id_agent):
     if cli!=None:
         #retorna dados limitados
         limitedData = serializer.data
-        limitedData.pop("saldo")
-        limitedData.pop("celular")
-        limitedData.pop("token")
+        #atributos que nao devem ser expostos
+        refusedAtt = ['saldo', 'celular','token']
+        for r in refusedAtt:
+            limitedData.pop(r)
         return Response(limitedData)
     else:
         return Response(serializer.data)
@@ -101,35 +116,65 @@ def IsphoneNumberValid(cell):
     #Only Mozambican Phone Number Prefix
     if cell == None:
         return False
-    if cell[0:6] in ['+25882','+25883','+25884','+25885','+25886','+25887']:
-        if len(cell[6:])==7:
-            try:
-                v = int(cell[6:])
-                return True
-            except ValueError:
-                return False
+    try:
+        if cell[0:6] in ['+25882','+25883','+25884','+25885','+25886','+25887']:
+            if len(cell[6:])==7:
+                try:
+                    v = int(cell[6:])
+                    return True
+                except ValueError:
+                    return False
+    except Exception:
+        return False
     return False
 
+#transacao para actualizar dados de agentes
+@transaction.atomic
+def updateAgent(agent):
+    agent.save()
 
 #altera os dados de uma agente (somente o numero de telefone)
 #AGENT(id==id_agent) 
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def updateAgenPhoneNumber(request):
-    cell = request.data.get('cell')
-    #Deve verificar o numero de telefone é valido... ainda é necessario escrever o metodo
-    if(not IsphoneNumberValid(cell)):
-        return Response({"error":"invalid invalid cell"},status=status.HTTP_400_BAD_REQUEST)
+def update(request):
+    #identificacao
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     agent = Agente.objects.filter(id_user=user.id).first()
     #verifica se a pessoa é um agente 
     if agent==None:
-            return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
-    agent.celular = cell
-    agent.save()
-    return Response({"update":f"new cell is {cell}"},status=status.HTTP_201_CREATED)
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    #verificacao de dados da requisicao
+    try:
+        id_agent = int(request.data.get('id'))
+    except Exception:
+        return Response({"error": "Invalid id"}, status=status.HTTP_400_BAD_REQUEST)
+    if id_agent!=agent.id:
+        return Response({"error": "Access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    cell = request.data.get('celular')
+    #Deve verificar o numero de telefone é valido... ainda é necessario escrever o metodo
+    if cell!=None:
+        if(not IsphoneNumberValid(cell)):
+            return Response({"error":"invalid celular"},status=status.HTTP_400_BAD_REQUEST)
+    
+    #nao permitir que alguns atributos sejam alguns atributos sejam alterados
+    refusedAtt = ['saldo', 'token','id_user']
+    for att in refusedAtt:
+        if att in request.data:
+            return Response({"error": "invalid operation"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    #salvar
+    serializer = AgenteSerializer(agent, data=request.data, partial=True)
+    if serializer.is_valid():
+        try:
+            updateAgent(serializer)
+            return Response({"message": "Success"}, status=status.HTTP_202_ACCEPTED)
+        except Exception:
+            return Response({'error': 'unsucess'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #recarrega a conta do agente
 #ADMIN

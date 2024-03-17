@@ -9,6 +9,7 @@ urlpatterns = [
     path('getall',getAll,name="getall"),
     path('register',Register.as_view(),name="RegisterAgent"),
     path('get/<int:id_agent>',get,name="get"),
-    path('updatecelular',updateAgenPhoneNumber,name="updatecelular"),
+    path('get',getMy,name="getMy"),
+    path('update',update,name="update"),
     path('addsaldo',addAgentSaldo,name="addAgentSaldo"),         
 ]
