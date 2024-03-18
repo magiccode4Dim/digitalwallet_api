@@ -14,8 +14,108 @@ import cliente
 from .numContaGenerator import generate_unique_numconta
 from opt_module.messageGenerator import mensagem_de_abertura_de_conta
 from opt_module.myOtp import send_messages
+from django.contrib.auth.models import User
+from agente.models import Agente
+from django.db import transaction
 # Create your views here.
 
+
+#ADMIN, CLIENT(id_client=id_client), AGENT (limited-data)
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAll(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #o cliente pode ver somente as contas dele
+    cli = Cliente.objects.filter(id_user=user.id).first()
+    if cli:
+        contas = Conta.objects.filter(id_client=cli.id)
+        contasSerializer = ContaSerializer(contas,many=True)
+        return Response(contasSerializer.data)
+    #admin pode ver todas contas
+    if user.is_superuser:
+        contas = Conta.objects.all()
+        contasSerializer = ContaSerializer(contas,many=True)
+        return Response(contasSerializer.data)
+    #o agente pode ver todas contas, porem com limitacao de dados
+    agent = Agente.objects.filter(id_user=user.id).first()
+    if agent:
+        contas = Conta.objects.all()
+        contasSerializer = ContaSerializer(contas,many=True)
+        refusedAtt = ['saldo', 'data_abertura']
+        limited_list = []
+        for a in contasSerializer.data:
+            for r in refusedAtt:
+                a.pop(r)
+            limited_list.append(a)
+        return Response(limited_list)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+#METODO CRIADO ESPECIAMENTE PARA QUESTOES DE PESQUISA E AUTO_COMPLIT
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllByNumero(request,number):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #o cliente pode ver somente as contas dele
+    cli = Cliente.objects.filter(id_user=user.id).first()
+    if cli:
+        contas = Conta.objects.filter(id_client=cli.id, numero__icontains=number)
+        contasSerializer = ContaSerializer(contas,many=True)
+        return Response(contasSerializer.data)
+    #admin pode ver todas contas
+    if user.is_superuser:
+        contas = Conta.objects.filter(numero__icontains=number)
+        contasSerializer = ContaSerializer(contas,many=True)
+        return Response(contasSerializer.data)
+    #o agente pode ver todas contas, porem com limitacao de dados
+    agent = Agente.objects.filter(id_user=user.id).first()
+    if agent:
+        contas = Conta.objects.filter(numero__icontains=number)
+        contasSerializer = ContaSerializer(contas,many=True)
+        refusedAtt = ['saldo', 'data_abertura']
+        limited_list = []
+        for a in contasSerializer.data:
+            for r in refusedAtt:
+                a.pop(r)
+            limited_list.append(a)
+        return Response(limited_list)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@transaction.atomic
+def deleteConta(conta):
+    conta.delete()
+
+
+#CLIENT(id_client=id_client) --  nao pode apagar uma conta com saldo
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete(request,id):
+    try:
+        id = int(id)
+    except Exception:
+        return Response({"error": "Invalid id"}, status=status.HTTP_400_BAD_REQUEST)
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    cli = Cliente.objects.filter(id_user=user.id).first()
+    if cli:
+        conta =  Conta.objects.filter(id_client=cli.id,id=id).first()
+        if conta:
+            #verifica se a conta esta vazia
+            if conta.saldo>0.0:
+                return Response({"error": "Saldo need to be 0.0 MT"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                deleteConta(conta)
+                return Response({"update":f"success"},status=status.HTTP_201_CREATED)
+            except Exception:
+                return Response({'error': 'unsucess'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+             
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+        
 #registrar uma conta
 class Register(APIView):
     authentication_classes = [TokenAuthentication]

@@ -6,5 +6,8 @@ from .views import *
 app_name = 'conta'
 
 urlpatterns = [
+    path('getall',getAll,name="getall"),
+    path('delete/<int:id>',delete,name="delete"),
+    path('getall/<str:number>',getAllByNumero,name="getAllByNumero"), #PESQUISAR COM BASE NO NUMERO DE CONTA
     path('register',Register.as_view(),name="RegisterConta")  
 ]
