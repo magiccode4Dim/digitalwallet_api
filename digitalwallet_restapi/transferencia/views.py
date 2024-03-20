@@ -20,8 +20,45 @@ from transferencia.models import Transferencia
 from deposito.views import operacaoIDisAlreadUsed
 from agente.models import Agente
 from transferencia.serializer import TransferenciaSerializer
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
+from operacao.models import Operacao
 
 TAXA_DE_TRANSFERENCIA = 3.0
+
+#ADMIN, CLIENT(id_client=id_client)
+#Retorna todas as transferencias de uma determinada conta
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAll(request,id_conta):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    cli = Cliente.objects.filter(id_user=user.id).first()
+    if cli:
+        #pega a conta
+        conta = Conta.objects.filter(id=id_conta, id_client=cli.id).first()
+    #admin pode ver todas operacoes
+    elif user.is_superuser:
+        conta = Conta.objects.filter(id=id_conta).first()
+    else:
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    if conta==None:
+        return Response({"error":"Invalid id_conta"}, status=status.HTTP_404_NOT_FOUND)
+    #pega todas as operacoes da conta
+    todasOperacaos = Operacao.objects.filter(id_conta=conta.id)
+    #pega todas as transferencias
+    transferenciasDaConta = []
+    for ops in todasOperacaos:
+        t =  Transferencia.objects.filter(id_operacao=ops.id).first()
+        if t:
+            transferenciasDaConta.append(t)
+    transSer = TransferenciaSerializer(transferenciasDaConta,many=True)
+    return Response(transSer.data)
+    
+
 
 #TRANSACAO TRANSFERENCIA - INICIO
 @transaction.atomic

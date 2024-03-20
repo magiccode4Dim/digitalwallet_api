@@ -17,8 +17,71 @@ from opt_module.myOtp import send_messages
 from django.contrib.auth.models import User
 from agente.models import Agente
 from django.db import transaction
+from operacao.models import Operacao
+from operacao.serializer import OperacaoSerializer
+from deposito.models import Deposito
+from levantamento.models import Levantamento
+from deposito.serializer import DepositoSerializer
+from levantamento.serializer import LevantamentoSerializer
+from transferencia.models import Transferencia
+from transferencia.serializer import TransferenciaSerializer
+from django.http import HttpResponse,JsonResponse,FileResponse
 # Create your views here.
 
+
+def getExtrato(allOperations):
+    extratoList = []
+    for op in allOperations:
+        dep = Deposito.objects.filter(id_operacao=op.id).first()
+        if dep:
+            depSer = DepositoSerializer(dep,many=False)
+            depDict = depSer.data
+            depDict["valor"] = op.valor
+            depDict["Data"] = op.data_operacao
+            depDict["operacao"] = "DEPOSITO"
+            extratoList.append(depDict)
+            continue
+        lev = Levantamento.objects.filter(id_operacao=op.id).first()
+        if lev:
+            levSer = LevantamentoSerializer(lev,many=False)
+            levDict = levSer.data
+            levDict["valor"] = op.valor
+            levDict["Data"] = op.data_operacao
+            levDict["operacao"] = "LEVANTAMENTO"
+            extratoList.append(levDict)
+            continue
+        trans = Transferencia.objects.filter(id_operacao=op.id).first()
+        if trans:
+            transSer = TransferenciaSerializer(trans,many=False)
+            transDict = transSer.data
+            transDict["valor"] = op.valor
+            transDict["Data"] = op.data_operacao
+            transDict["operacao"] = "TRANSFERÊNCIA"
+            extratoList.append(transDict)
+      
+    return extratoList
+
+#retorna o extrado bancario de uma conta
+#ADMIN, CLIENT(id_client=id_client)
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getExtratoConta(request,id_conta):
+    conta = None
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #
+    cli = Cliente.objects.filter(id_user=user.id).first()
+    if cli:
+        conta = Conta.objects.filter(id_client=cli.id, id=id_conta).first()
+    elif user.is_superuser:
+        conta = Conta.objects.filter(id=id_conta).first()
+    if conta:
+            #pega todas as operacoes relacionadas com essa conta
+            operacaoes = Operacao.objects.filter(id_conta=conta.id)
+            extrato = getExtrato(operacaoes)
+            return Response(extrato)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
 
 #ADMIN, CLIENT(id_client=id_client), AGENT (limited-data)
 @api_view(['GET'])

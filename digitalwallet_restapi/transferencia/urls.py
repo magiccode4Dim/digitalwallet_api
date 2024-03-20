@@ -6,5 +6,6 @@ from .views import *
 app_name = 'transferencia'
 
 urlpatterns = [
-    path('register',Register.as_view(),name="RegisterTransferencia") 
+    path('register',Register.as_view(),name="RegisterTransferencia"),
+    path('getall/<int:id_conta>',getAll,name="getAll") 
 ]
