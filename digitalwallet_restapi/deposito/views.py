@@ -20,6 +20,56 @@ from transferencia.models import Transferencia
 from levantamento.models import Levantamento
 from .serializer import DepositoSerializer
 from opt_module.serializer import Temp_DepositoSerializer
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from agente.models import Agente
+
+#AGENT(id_agent=id_agent)
+#Retorna todos depositos
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllAgent(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    agent = Agente.objects.filter(id_user=user.id).first()
+    if agent:
+        depositos = Deposito.objects.filter(id_agent=agent.id)
+        depSer = DepositoSerializer(depositos,many=True)
+        return Response(depSer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+#ADMIN, CLIENT(id_client=id_client)
+#Retorna todas os depositos de uma determinada conta
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAll(request,id_conta):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    cli = Cliente.objects.filter(id_user=user.id).first()
+    if cli:
+        #pega a conta
+        conta = Conta.objects.filter(id=id_conta, id_client=cli.id).first()
+    #admin pode ver todas operacoes
+    elif user.is_superuser:
+        conta = Conta.objects.filter(id=id_conta).first()
+    else:
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    if conta==None:
+        return Response({"error":"Invalid id_conta"}, status=status.HTTP_404_NOT_FOUND)
+    #pega todas as operacoes da conta
+    todasOperacaos = Operacao.objects.filter(id_conta=conta.id)
+    #pega todas as transferencias
+    depositosDaConta = []
+    for ops in todasOperacaos:
+        d =  Deposito.objects.filter(id_operacao=ops.id).first()
+        if d:
+            depositosDaConta.append(d)
+    depSer = DepositoSerializer(depositosDaConta,many=True)
+    return Response(depSer.data)
+    
 
 #TRANSACAO DEPOSITO - INICIO
 @transaction.atomic

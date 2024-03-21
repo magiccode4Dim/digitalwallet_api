@@ -26,6 +26,7 @@ from levantamento.serializer import LevantamentoSerializer
 from transferencia.models import Transferencia
 from transferencia.serializer import TransferenciaSerializer
 from django.http import HttpResponse,JsonResponse,FileResponse
+from utilizador.serializer import UserSerializer
 # Create your views here.
 
 
@@ -60,6 +61,24 @@ def getExtrato(allOperations):
             extratoList.append(transDict)
       
     return extratoList
+
+#retorna o ID do titular de uma conta
+#ALL
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getContaTitularID(request,numero_conta):
+    conta = Conta.objects.filter(numero=numero_conta).first()
+    if conta:
+        client =  Cliente.objects.filter(id=conta.id_client.id).first()
+        if client:
+            user = User.objects.get(id=client.id_user.id)
+            userSerializer =  UserSerializer(user,many=False)
+            limitedData = userSerializer.data
+            limitedData.pop("password")
+            return Response(limitedData)
+    return Response({"error":"Not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 #retorna o extrado bancario de uma conta
 #ADMIN, CLIENT(id_client=id_client)

@@ -22,8 +22,57 @@ from .serializer import LevantamentoSerializer
 from opt_module.serializer import Temp_DepositoSerializer
 from deposito.views import operacaoIDisAlreadUsed
 from agente.models import Agente
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 TAXA_DE_LEVANTAMENTO = 2.0
+
+#AGENT(id_agent=id_agent)
+#Retorna todas as levantamentos
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllAgent(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    agent = Agente.objects.filter(id_user=user.id).first()
+    if agent:
+        levantamentos = Levantamento.objects.filter(id_agent=agent.id)
+        levSer = LevantamentoSerializer(levantamentos,many=True)
+        return Response(levSer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+#ADMIN, CLIENT(id_client=id_client)
+#Retorna todas as levantamentos de uma determinada conta
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAll(request,id_conta):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    cli = Cliente.objects.filter(id_user=user.id).first()
+    if cli:
+        #pega a conta
+        conta = Conta.objects.filter(id=id_conta, id_client=cli.id).first()
+    #admin pode ver todas operacoes
+    elif user.is_superuser:
+        conta = Conta.objects.filter(id=id_conta).first()
+    else:
+        return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+    if conta==None:
+        return Response({"error":"Invalid id_conta"}, status=status.HTTP_404_NOT_FOUND)
+    #pega todas as operacoes da conta
+    todasOperacaos = Operacao.objects.filter(id_conta=conta.id)
+    #pega todas as transferencias
+    levantamentosDaConta = []
+    for ops in todasOperacaos:
+        l =  Levantamento.objects.filter(id_operacao=ops.id).first()
+        if l:
+            levantamentosDaConta.append(l)
+    levSer = LevantamentoSerializer(levantamentosDaConta,many=True)
+    return Response(levSer.data)
+    
 
 #TRANSACAO LEVANTAMENTO - INICIO
 @transaction.atomic

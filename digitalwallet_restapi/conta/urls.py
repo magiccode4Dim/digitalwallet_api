@@ -10,5 +10,6 @@ urlpatterns = [
     path('delete/<int:id>',delete,name="delete"),
     path('getall/<str:number>',getAllByNumero,name="getAllByNumero"), #PESQUISAR COM BASE NO NUMERO DE CONTA
     path('register',Register.as_view(),name="RegisterConta"),
-    path('extract/<int:id_conta>',getExtratoConta,name="getExtratoConta")    
+    path('extract/<int:id_conta>',getExtratoConta,name="getExtratoConta"),
+    path('titular/<str:numero_conta>',getContaTitularID,name="getContaTitularID")      
 ]
