@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  opt_server:
+    build:
+      context: .
+      dockerfile: otp_server.Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - HOST_OTP_SERVER=0.0.0.0
+      - PORT_OTP_SERVER=3001
+    command: >
+      sh -c "python myOTPserver.py"
+  web:
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST_DEFAULT_DB=default_db
+      - PORT_DEFAULT_DB=5432
+      - USER_DEFAULT_DB=narciso
+      - PASS_DEFAULT_DB=2001
+      - HOST_TEMP_DB=temp_db
+      - PORT_TEMP_DB=5432
+      - USER_TEMP_DB=narciso
+      - PASS_TEMP_DB=2001
+      - HOST_OTP_SERVER=opt_server
+      - PORT_OTP_SERVER=3001
+      - DJANGO_SUPERUSER_PASSWORD=@senhaMu1toF0RT3
+    depends_on:
+      - opt_server
+      - default_db
+      - temp_db
+    command: >
+      sh -c " python3 manage.py makemigrations utilizador &
+              python3 manage.py makemigrations agente &
+              python3 manage.py makemigrations cliente &
+              python3 manage.py makemigrations conta &
+              python3 manage.py makemigrations operacao &
+              python3 manage.py makemigrations deposito &
+              python3 manage.py makemigrations levantamento &
+              python3 manage.py makemigrations transferencia &
+              python3 manage.py migrate --database=default contenttypes &
+              python3 manage.py migrate --database=default admin &
+              python3 manage.py migrate --database=default auth &
+              python3 manage.py migrate --database=default authtoken &
+              python3 manage.py migrate --database=default sessions &
+              python3 manage.py migrate --database=default utilizador &
+              python3 manage.py migrate --database=default agente &
+              python3 manage.py migrate --database=default cliente &
+              python3 manage.py migrate --database=default conta &
+              python3 manage.py migrate --database=default operacao &
+              python3 manage.py migrate --database=default deposito &
+              python3 manage.py migrate --database=default levantamento &
+              python3 manage.py migrate --database=default transferencia &
+              python3 manage.py migrate --database=otp_dbtemp opt_module &
+              python3 manage.py createsuperuser --noinput --username narciso --email narciso@magiccode.com &
+              python3 manage.py runserver 0.0.0.0:8000
+              "
+  default_db:
+    image: postgres
+    environment:
+      POSTGRES_DB: carteiradigital
+      POSTGRES_USER: narciso
+      POSTGRES_PASSWORD: 2001
+  temp_db:
+    image: postgres
+    environment:
+      POSTGRES_DB: tempcarteiradigital
+      POSTGRES_USER: narciso
+      POSTGRES_PASSWORD: 2001

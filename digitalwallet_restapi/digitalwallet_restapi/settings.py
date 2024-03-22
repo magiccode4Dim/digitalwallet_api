@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Carrega variáveis de ambiente de .env
+#load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -88,18 +93,18 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'carteiradigital',
-        'USER':'narciso',
-        'PASSWORD':'2001',
-        'HOST':'172.17.0.2',
-        'PORT':5432
+        'USER':os.getenv('USER_DEFAULT_DB'),
+        'PASSWORD':os.getenv('PASS_DEFAULT_DB'),
+        'HOST':os.getenv('HOST_DEFAULT_DB'),
+        'PORT':os.getenv('PORT_DEFAULT_DB')
     },
     'otp_dbtemp': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tempcarteiradigital',
-        'USER':'narciso',
-        'PASSWORD':'2001',
-        'HOST':'172.17.0.2',
-        'PORT':5432
+        'USER':os.getenv('USER_TEMP_DB'),
+        'PASSWORD':os.getenv('PASS_TEMP_DB'),
+        'HOST':os.getenv('HOST_TEMP_DB'),
+        'PORT':os.getenv('PORT_TEMP_DB')
     }
 }
 

@@ -23,7 +23,6 @@ python3 manage.py migrate --database=default admin
 python3 manage.py migrate --database=default auth
 python3 manage.py migrate --database=default authtoken
 python3 manage.py migrate --database=default contenttypes
-
 python3 manage.py migrate --database=default sessions
 
 

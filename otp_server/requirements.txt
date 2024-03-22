@@ -1,0 +1,4 @@
+cryptography==3.4.8
+Requests==2.31.0
+simple_websocket_server==0.4.4
+websockets==12.0
