@@ -5,8 +5,19 @@ validados.
 
 Para a migracao, será necessário executar os seguintes comandos em sequencia:
 
+python3 manage.py makemigrations utilizador
+python3 manage.py makemigrations agente
+python3 manage.py makemigrations cliente
+python3 manage.py makemigrations conta
+python3 manage.py makemigrations operacao
+python3 manage.py makemigrations deposito
+python3 manage.py makemigrations levantamento
+python3 manage.py makemigrations transferencia
+
+
 Primeiro, deve-se migrar os modelos das aplicacoes defauls do django que são :
 admin, auth, authtoken, contenttypes, sessions
+
 
 python3 manage.py migrate --database=default admin
 python3 manage.py migrate --database=default auth
@@ -14,6 +25,7 @@ python3 manage.py migrate --database=default authtoken
 python3 manage.py migrate --database=default contenttypes
 
 python3 manage.py migrate --database=default sessions
+
 
 Em seguida, as demais apps do sistema:
 
@@ -29,4 +41,4 @@ python3 manage.py migrate --database=default transferencia
 python3 manage.py migrate --database=otp_dbtemp opt_module   #para mover para base de dados temporaria
 
 com tudo feito, já se criar o superusuario:
-python3 manage.py createsuperuser   #Vai usar a base de dados default por não especificar (Vai reclamar que uma migração de opt_module não foi feita, mas é só ignorar)
+python3 manage.py createsuperuser --database=default   #Vai usar a base de dados default por não especificar (Vai reclamar que uma migração de opt_module não foi feita, mas é só ignorar)

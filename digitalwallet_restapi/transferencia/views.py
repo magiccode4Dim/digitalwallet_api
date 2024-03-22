@@ -121,6 +121,9 @@ class Register(APIView):
         newTransferen = Temp_TransferenciaSerializer(data=request.data)
         if not newTransferen.is_valid():
             return Response(newTransferen.errors, status=status.HTTP_400_BAD_REQUEST)
+        #verificar se a transferencia esta a acontecer entre contas diferentes
+        if contaDestino.numero == operac.id_conta.numero:
+            return Response({"erro":"invalid numero_conta"}, status.HTTP_400_BAD_REQUEST)
         #guarda a tranferencia
         newt = newTransferen.save()
         

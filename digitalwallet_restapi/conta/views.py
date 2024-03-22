@@ -30,38 +30,64 @@ from utilizador.serializer import UserSerializer
 # Create your views here.
 
 
-def getExtrato(allOperations):
+#retorna todas operacoes envolvendo a uma determinada conta
+def getExtrato(conta):
+    depositos = Deposito.objects.all()
+    levantamentos =  Levantamento.objects.all()
+    transferencias = Transferencia.objects.all()
     extratoList = []
-    for op in allOperations:
-        dep = Deposito.objects.filter(id_operacao=op.id).first()
-        if dep:
-            depSer = DepositoSerializer(dep,many=False)
-            depDict = depSer.data
-            depDict["valor"] = op.valor
-            depDict["Data"] = op.data_operacao
-            depDict["operacao"] = "DEPOSITO"
-            extratoList.append(depDict)
-            continue
-        lev = Levantamento.objects.filter(id_operacao=op.id).first()
-        if lev:
-            levSer = LevantamentoSerializer(lev,many=False)
-            levDict = levSer.data
-            levDict["valor"] = op.valor
-            levDict["Data"] = op.data_operacao
-            levDict["operacao"] = "LEVANTAMENTO"
-            extratoList.append(levDict)
-            continue
+    operacaoes = Operacao.objects.all()
+    for op in operacaoes:
+        for d in depositos:
+            #verifica se o deposito foi feito com aquela conta enviada por parametro
+            if d.id_operacao.id_conta.id==conta.id and op.id==d.id_operacao.id:
+                    depSer = DepositoSerializer(d,many=False)
+                    depDict = depSer.data
+                    depDict["valor"] = op.valor
+                    depDict["Data"] = op.data_operacao
+                    depDict["operacao"] = "DEPOSITO"
+                    extratoList.append(depDict)
+                    break
+        for l in levantamentos:
+            #verifica se o levantamento foi feito com aquela conta
+            if l.id_operacao.id_conta.id==conta.id and op.id==l.id_operacao.id:
+                    levSer = LevantamentoSerializer(l,many=False)
+                    levDict = levSer.data
+                    levDict["valor"] = op.valor
+                    levDict["Data"] = op.data_operacao
+                    levDict["operacao"] = "LEVANTAMENTO"
+                    extratoList.append(levDict)
+                    break
+        for t in transferencias:
+            #verifica se o transferencia foi feito com aquela conta
+            if t.id_operacao.id_conta.id==conta.id and op.id==t.id_operacao.id:
+                    transSer = TransferenciaSerializer(t,many=False)
+                    transDict = transSer.data
+                    transDict["valor"] = op.valor
+                    transDict["Data"] = op.data_operacao
+                    transDict["operacao"] = "TRANSFERÊNCIA"
+                    extratoList.append(transDict)
+                    break
+#verifica se aquela operacao foi de um dinheiro que a conta recebeu
+        #verificar se aquela operacao é uma transferencia
         trans = Transferencia.objects.filter(id_operacao=op.id).first()
         if trans:
-            transSer = TransferenciaSerializer(trans,many=False)
-            transDict = transSer.data
-            transDict["valor"] = op.valor
-            transDict["Data"] = op.data_operacao
-            transDict["operacao"] = "TRANSFERÊNCIA"
-            extratoList.append(transDict)
-      
+            #verificar se a transferencia foi feita por uma conta diferente da conta passada por parametro
+            if trans.id_operacao.id_conta.numero != conta.numero:
+                #verificar se a numero de conta na operacao dessa transferencia, é o mesmo que o numero da conta passada por parametro
+                if trans.numero_conta == conta.numero:
+                    t = trans
+                    transSer = TransferenciaSerializer(trans,many=False)
+                    transDict = transSer.data
+                    transDict["valor"] = t.id_operacao.valor
+                    transDict["Data"] = t.id_operacao.data_operacao
+                    transDict["operacao"] = "RECEBEU"
+                    transDict["origem"] = t.id_operacao.id_conta.id_client.id_user.first_name+" "+t.id_operacao.id_conta.id_client.id_user.last_name
+                    extratoList.append(transDict)       
+    #inverte a lista para deixar o extrato na ordem decrescente
+    extratoList.reverse()    
     return extratoList
-
+    
 #retorna o ID do titular de uma conta
 #ALL
 @api_view(['GET'])
@@ -98,7 +124,7 @@ def getExtratoConta(request,id_conta):
     if conta:
             #pega todas as operacoes relacionadas com essa conta
             operacaoes = Operacao.objects.filter(id_conta=conta.id)
-            extrato = getExtrato(operacaoes)
+            extrato = getExtrato(conta)
             return Response(extrato)
     return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
 
