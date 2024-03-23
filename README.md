@@ -21,21 +21,21 @@ REQUISITOS |
  * USERNAME : magiccode
  * PASSWORD: @senhaMu1toF0RT3
 
- #### SERVIDOR WEBSOCKET MY-OTP
+ ### SERVIDOR WEBSOCKET MY-OTP
  * URL: ws://<SEU_IP>:3001
 
  ** NOTA: 
  1. O servidor MY-OTP pode ser conectado na aplicação Android utilizando o ip e porta do servidor.
  2. Pode também ser conectado com o script python presente na pasta otp_client (RECOMENDADO)
 
- # CONECTANDO O SERVIDOR MY-OTP VIA SCRIPT PYTHON
+ ### CONECTANDO O SERVIDOR MY-OTP VIA SCRIPT PYTHON
  1. Na raiz do projecto, Vá até o directorio otp_client
  2. Instale as dependencias : pip install -r requirements.txt
  3. Rode o script : python3 client_onlyreceived.py
  4. AGUARDE AS MENSAGENS OTP VINDOS DO SERVIDOR
 
  # METODO 2 - INICIO
- # INSTAÇÃO MANUAL EM AMBIENTE DE DESENVOLVIMENTO (VSCODE)
+ ### INSTAÇÃO MANUAL EM AMBIENTE DE DESENVOLVIMENTO (VSCODE)
  ***********
  REQUISITOS |
  ************
@@ -74,8 +74,10 @@ REQUISITOS |
     * python3 manage.py migrate --database=otp_dbtemp opt_module
  6. Crie o superuser usando :
     * python3 manage.py createsuperuser
+ 7. Rode os servidor My-OTP presente no directorio otp_server/ e rode também o client presente em otp_client/ (em terminais diferentes)
  8. Rode a aplicação usando :
     * python manage.py runserver 0.0.0.0:8000
+
  
 
 
