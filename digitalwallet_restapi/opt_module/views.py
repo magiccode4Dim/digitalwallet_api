@@ -26,7 +26,116 @@ from operacao.models import Operacao
 from django.db import transaction
 from opt_module.messageGenerator import *
 from opt_module.myOtp import send_messages
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import AllowAny,IsAuthenticated
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 # Create your views here.
+
+#ADMIN
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllTempAgent(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = Temp_Agente.objects.all()
+        serializer = Temp_AgenteSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllTempClient(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = Temp_Cliente.objects.all()
+        serializer = Temp_ClienteSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllTempConta(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = Temp_Conta.objects.all()
+        serializer = Temp_ContaSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllTempDeposito(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = Temp_Deposito.objects.all()
+        serializer = Temp_DepositoSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllTempLevantamento(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = Temp_Levantamento.objects.all()
+        serializer = Temp_LevantamentoSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllTempTransferencia(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = Temp_Transferencia.objects.all()
+        serializer = Temp_TransferenciaSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAlloperacaoOPT(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = operacaoOPT.objects.all()
+        serializer = operacaoOPTSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllaccontValidationOTP(request):
+    id_user = request.user.id
+    user =  User.objects.get(id=id_user)
+    #se a pessoa é superuser, entao vai receber todos os dados dos agentes
+    if user.is_superuser:
+        data = accontValidationOTP.objects.all()
+        serializer = accontValidateOPTSerializer(data, many=True)
+        return Response(serializer.data)
+    return Response({"erro":"access denied"}, status=status.HTTP_401_UNAUTHORIZED)
 
 #FUNCOES AUXILIARES - INICIO
 
