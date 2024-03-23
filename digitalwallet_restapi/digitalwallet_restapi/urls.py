@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.views.generic import TemplateView
+from rest_framework.schemas import get_schema_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,4 +29,12 @@ urlpatterns = [
     path('transferencia/', include('transferencia.urls')),
     path('utilizador/', include('utilizador.urls')),
     path('otp/', include('opt_module.urls')),
+    path('docs/', TemplateView.as_view(
+        template_name='docs.html',
+        extra_context={'schema_url':'api_schema'}
+        ), name='swagger-ui'),
+    path('api_schema/', get_schema_view(
+        title='DOCUMENTAÇÃO DA API',
+        description='Aqui estão os detalhes de todas urls da aplicação.'
+    ), name='api_schema')
 ]
