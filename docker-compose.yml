@@ -43,10 +43,9 @@ services:
               python3 manage.py makemigrations deposito &
               python3 manage.py makemigrations levantamento &
               python3 manage.py makemigrations transferencia &
-              python3 manage.py migrate --database=default contenttypes &
               python3 manage.py migrate --database=default admin &
               python3 manage.py migrate --database=default auth &
-              python3 manage.py migrate --database=default authtoken &
+              python3 manage.py migrate --database=default contenttypes &
               python3 manage.py migrate --database=default sessions &
               python3 manage.py migrate --database=default utilizador &
               python3 manage.py migrate --database=default agente &
@@ -56,6 +55,7 @@ services:
               python3 manage.py migrate --database=default deposito &
               python3 manage.py migrate --database=default levantamento &
               python3 manage.py migrate --database=default transferencia &
+              python3 manage.py migrate --database=default authtoken &
               python3 manage.py migrate --database=otp_dbtemp opt_module &
               python3 manage.py createsuperuser --noinput --username magiccode --email magic@magiccode.com &
               python3 manage.py runserver 0.0.0.0:8000
