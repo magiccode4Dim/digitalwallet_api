@@ -21,12 +21,12 @@ services:
     environment:
       - HOST_DEFAULT_DB=default_db
       - PORT_DEFAULT_DB=5432
-      - USER_DEFAULT_DB=narciso
-      - PASS_DEFAULT_DB=2001
+      - USER_DEFAULT_DB=magiccode
+      - PASS_DEFAULT_DB=2024
       - HOST_TEMP_DB=temp_db
       - PORT_TEMP_DB=5432
-      - USER_TEMP_DB=narciso
-      - PASS_TEMP_DB=2001
+      - USER_TEMP_DB=magiccode
+      - PASS_TEMP_DB=2024
       - HOST_OTP_SERVER=opt_server
       - PORT_OTP_SERVER=3001
       - DJANGO_SUPERUSER_PASSWORD=@senhaMu1toF0RT3
@@ -57,18 +57,18 @@ services:
               python3 manage.py migrate --database=default levantamento &
               python3 manage.py migrate --database=default transferencia &
               python3 manage.py migrate --database=otp_dbtemp opt_module &
-              python3 manage.py createsuperuser --noinput --username narciso --email narciso@magiccode.com &
+              python3 manage.py createsuperuser --noinput --username magiccode --email magic@magiccode.com &
               python3 manage.py runserver 0.0.0.0:8000
               "
   default_db:
     image: postgres
     environment:
       POSTGRES_DB: carteiradigital
-      POSTGRES_USER: narciso
-      POSTGRES_PASSWORD: 2001
+      POSTGRES_USER: magiccode
+      POSTGRES_PASSWORD: 2024
   temp_db:
     image: postgres
     environment:
       POSTGRES_DB: tempcarteiradigital
-      POSTGRES_USER: narciso
-      POSTGRES_PASSWORD: 2001
+      POSTGRES_USER: magiccode
+      POSTGRES_PASSWORD: 2024

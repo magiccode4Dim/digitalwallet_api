@@ -37,7 +37,13 @@ python3 manage.py migrate --database=default deposito
 python3 manage.py migrate --database=default levantamento
 python3 manage.py migrate --database=default transferencia
 ...
-python3 manage.py migrate --database=otp_dbtemp opt_module   #para mover para base de dados temporaria
+
+#para mover para base de dados temporaria
+
+python3 manage.py migrate --database=otp_dbtemp opt_module   
 
 com tudo feito, já se criar o superusuario:
-python3 manage.py createsuperuser --database=default   #Vai usar a base de dados default por não especificar (Vai reclamar que uma migração de opt_module não foi feita, mas é só ignorar)
+ #Vai usar a base de dados default por não especificar (Vai reclamar que uma migração de opt_module não foi feita, mas é só ignorar)
+
+
+python3 manage.py createsuperuser --database=default  
