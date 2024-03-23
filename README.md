@@ -1,4 +1,5 @@
 # digitalwallet_api
+API DE CARTEIRA DIGITAL CLIENTE-AGENTE
 # METODO 1 - INICIO (RECOMENDADO)
 ## INSTALAÇÃO NO DOCKER 
 ***********
@@ -76,7 +77,7 @@ REQUISITOS |
     * python3 manage.py createsuperuser
  7. Rode os servidor My-OTP presente no directorio otp_server/ e rode também o client presente em otp_client/ (em terminais diferentes)
  8. Rode a aplicação usando :
-    * python manage.py runserver 0.0.0.0:8000
+    * python3 manage.py runserver 0.0.0.0:8000
 
  
 
