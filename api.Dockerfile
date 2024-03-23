@@ -6,4 +6,5 @@ WORKDIR /app
 COPY digitalwallet_restapi .
 
 RUN pip install -r requirements.txt
+RUN pip install django-rest-swagger
 
