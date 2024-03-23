@@ -50,7 +50,8 @@ REQUISITOS |
  2. Instale as dependencias presentes nos directorios digitalwallet_api/ otp_client/ e /otp_server usando :
     * pip install -r requirements.txt , em cada termianal aberto nos directorios
  4. Substitua as configurações no arquivo digitalwallet_api/.env de acordo com as suas base de dados.
- 5. Crie as migrações e as aplique na base de dados, rodando os seguintes comandos descritos  em digitalwallet_api/:
+ 5. Descomente a linha #load_dotenv() em digitalwallet_api/setthings.py
+ 6. Crie as migrações e as aplique na base de dados, rodando os seguintes comandos descritos  em digitalwallet_api/:
     * python3 manage.py makemigrations utilizador
     * python3 manage.py makemigrations agente
     * python3 manage.py makemigrations cliente
@@ -73,10 +74,10 @@ REQUISITOS |
     * python3 manage.py migrate --database=default levantamento
     * python3 manage.py migrate --database=default transferencia
     * python3 manage.py migrate --database=otp_dbtemp opt_module
- 6. Crie o superuser usando :
+ 7. Crie o superuser usando :
     * python3 manage.py createsuperuser
- 7. Rode os servidor My-OTP presente no directorio otp_server/ e rode também o client presente em otp_client/ (em terminais diferentes)
- 8. Rode a aplicação usando :
+ 8. Rode os servidor My-OTP presente no directorio otp_server/ e rode também o client presente em otp_client/ (em terminais diferentes)
+ 9. Rode a aplicação usando :
     * python3 manage.py runserver 0.0.0.0:8000
 
  
