@@ -34,16 +34,15 @@ REQUISITOS |
  3. Rode o script : python3 client_onlyreceived.py
  4. AGUARDE AS MENSAGENS OTP VINDOS DO SERVIDOR
 
- # --------------------------------METODO 2 - INICIO----------------------------------------------------------
+ # METODO 2 - INICIO
  # INSTAÇÃO MANUAL EM AMBIENTE DE DESENVOLVIMENTO (VSCODE)
  ***********
  REQUISITOS |
  ************
- ---- OS - WINDOWS 10/11 , MACOS, UBUNTU >= 20.04  (recomendado)
- ---- PYTHON >= 3.8 / PYTHON (3.10.12 -  Usado no projecto)
- ---- SERVIDOR POSTGRES DISPONIVEL COM UTILIZADOR VALIDO, IP, PORTA, SENHA
- ---- EDITOR VSCODE OU OUTRO
- ---- 
+ 1. OS - WINDOWS 10/11 , MACOS, UBUNTU >= 20.04  (recomendado)
+ 2. PYTHON >= 3.8 / PYTHON (3.10.12 -  Usado no projecto)
+ 3. SERVIDOR POSTGRES DISPONIVEL COM UTILIZADOR VALIDO, IP, PORTA, SENHA
+ 4. EDITOR VSCODE OU OUTRO
  ************
  
  1. Clone o Projecto
