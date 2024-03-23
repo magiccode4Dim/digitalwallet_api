@@ -1,6 +1,6 @@
 # digitalwallet_api
-# --------------------------------METODO 1 - INICIO (RECOMENDADO)----------------------------------------------------------
-# INSTALAÇÃO NO DOCKER 
+# METODO 1 - INICIO (RECOMENDADO)
+## INSTALAÇÃO NO DOCKER 
 ***********
 REQUISITOS |
 ************
@@ -8,7 +8,6 @@ REQUISITOS |
 ---- PYTHON >= 3.8 / PYTHON (3.10.12 -  Usado no projecto)
 ---- DOCKER >= 25.0.4
 ---- CONECÇÃO COM A INTERNET
-----
 ************
 1. Clone o Projecto
 2. A pasta digitalwallet_api
@@ -17,15 +16,15 @@ REQUISITOS |
 
  Por padrão o serviço estaŕá disponivel em : http://127.0.0.1:8000
 
- # ACESSANDO CENTRAL DE ADMINISTRADOR
+ ### ACESSANDO CENTRAL DE ADMINISTRADOR
  URL : http://<SEU_IP>:8000/admin/login/?next=/admin/
  USERNAME : magiccode
  PASSWORD: @senhaMu1toF0RT3
 
- # SERVIDOR WEBSOCKET MY-OTP
+ #### SERVIDOR WEBSOCKET MY-OTP
  URL: ws://<SEU_IP>:3001
 
- ** NOTA:
+ ** NOTA: 
     - O servidor MY-OTP pode ser conectado na aplicação Android utilizando o ip e porta do servidor.
     - Pode também ser conectado com o script python presente na pasta otp_client (RECOMENDADO)
 
