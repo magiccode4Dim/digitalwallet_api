@@ -16,6 +16,9 @@ from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.contrib.auth.hashers import check_password
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 #cria um novo token para um utilizador
 def recriar_token_utilizador(user):
@@ -29,6 +32,15 @@ def recriar_token_utilizador(user):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request):
+    """
+        Retorna a Lista de todos utilizadores.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{ "username": "string", "email": "string", },{...]</br>  
+            RESPONSE CODE 401: Acesso Negado.</br>  
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados de todos os utilizadores
@@ -48,6 +60,15 @@ def getAll(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getMy(request):
+    """
+        Retorna os dados do utilizador autenticado.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: { "username": "string", "email": "string",... }</br>  
+            RESPONSE CODE 401: Acesso Negado.</br>  
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     if user!=None:
@@ -63,6 +84,15 @@ def getMy(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get(request,id_user_to_get):
+    """
+        Retorna o utilizador com o ID passado.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: { "username": "string", "email": "string",... }</br>  
+            RESPONSE CODE 400: O id passado é invalido.</br>  
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     try:
         id_user_to_get = int(id_user_to_get)
         user_to_get = User.objects.get(id=id_user_to_get)
@@ -96,6 +126,16 @@ def deleteUser(user_to_delete:User):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def delete(request,id_user_to_delete):
+    """
+        Apaga o utilizador com o ID.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 202: Apagado com sucesso.</br>  
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 400: O id passado é invalido.</br>    
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     try:
         id_user_to_delete = int(id_user_to_delete)
         user_to_delete = User.objects.get(id=id_user_to_delete)
@@ -120,6 +160,17 @@ def updateUser(user_to_update:User):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def update(request):
+    """
+        Actualiza dados do utilizador. Os dados que podem ser passados são :</br>
+        { "email": "string", "first_name": "string", "last_name": "string" }</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 202: Actualizado com sucesso.</br>  
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 400:  Algum atributo é invalido.</br>    
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user = User.objects.get(id=id_user)
     try:
@@ -159,6 +210,18 @@ def change_pass(user, new_password):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def change_password(request):
+    """
+        Troca a senha. Os dados que podem ser passados são :</br>
+        {"old_password":"string","new_password":"string"}</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 202: Actualizado com sucesso.</br>  
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 400:  Algum atributo é invalido.</br>
+            RESPONSE CODE 406:  Algum problema com as senhas.</br>     
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user = User.objects.get(id=id_user)
     #nao pode permitir a alteracao de passwords para admin ou staff
@@ -182,6 +245,16 @@ def change_password(request):
     
 #Se as credencias forem validas, um token de sessao será retornado
 class Login(APIView):
+    """
+        Autenticação. Os dados que podem ser passados são :</br>
+        {"username":"string","password":"string"}</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: {'token': token}.</br>  
+            RESPONSE CODE 400:  Algum atributo é invalido.</br>    
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: NÃO</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um para obtenção do token
 
@@ -206,8 +279,25 @@ class Login(APIView):
         else:
             return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 #Cadastrar novo utilizador
 class Register(APIView):
+    """
+        Os dados que devem ser enviados como POST são:       
+            {
+            "username": "string",
+            "email": "string",
+            "password": "string",
+            "first_name": "string", 
+            "last_name": "string"
+            } </br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: {'id_user':id} - Retorna o ID do novo utilizador criado.</br>  
+            RESPONSE CODE 400: Algum erro de atributo.</br>  
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: NÃO</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um para obtenção do token
     def post(self, request):

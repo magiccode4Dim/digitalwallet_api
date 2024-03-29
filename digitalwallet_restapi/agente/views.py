@@ -31,6 +31,15 @@ from opt_module.optcodeGenerator import generate_random_key
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request):
+    """
+        Retorna todos agentes :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id": int,"id_user": int,"saldo": float,"celular"...}..]"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR E CLIENTES</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -62,6 +71,15 @@ def getAll(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getMy(request):
+    """
+        Retorna o agente do Utilizador autenticado :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: {"id": int,"id_user": int,"saldo": float,"celular"...}"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: AGENTES</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     agent = Agente.objects.filter(id_user=user.id).first()
@@ -77,6 +95,17 @@ def getMy(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get(request,id_agent):
+    """
+        Retorna o agente com o ID :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: {"id": int,"id_user": int,"saldo": float,"celular"...}"</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 404: Não encontrado.</br>  
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     cli =  None
     try:
         id_agent = int(id_agent)
@@ -139,6 +168,16 @@ def updateAgent(agent):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def update(request):
+    """
+        Actualiza o Agente autenticado. Os dados a serem passados são: {id":int,"celular":"string"}</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 202: Actualizado com sucesso."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: AGENTE</br>  
+    """
     #identificacao
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
@@ -189,6 +228,17 @@ def aumentarsaldoAgente(agent:Agente,valor:float):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def addAgentSaldo(request):
+    """
+        Aumenda o saldo de um Agente. {"valor":float, "id_agent":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Actualizado com sucesso."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 404: Não encontrado.</br>  
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     #deve verificar se é um administrador para aumentar o saldo
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
@@ -214,6 +264,16 @@ def addAgentSaldo(request):
     
 #Criar uma agente...
 class Register(APIView):
+    """
+        Cadastra um Agente. {"celular":"string", "id_user":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Criado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 404: Não encontrado.</br>  
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um para obtenção do token
     def post(self, request):
