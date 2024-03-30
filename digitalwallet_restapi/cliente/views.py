@@ -192,6 +192,17 @@ def update(request):
 # Create your views here.
 #Criar uma conta cliente...
 class Register(APIView):
+    """
+        Cadastra um Cliente. {"celular":"string", "id_user":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Criado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 404: Não encontrado.</br>
+            RESPONSE CODE 406: Id do usuário não aceite.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um para obtenção do token
     def post(self, request):
