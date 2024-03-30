@@ -94,6 +94,15 @@ def getExtrato(conta):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getContaTitularID(request,numero_conta):
+    """
+        Retorna o Titular de uma Determinada Conta :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: {"id": int,"username": "string",...}"</br>  
+            RESPONSE CODE 404: Não Encontrado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     conta = Conta.objects.filter(numero=numero_conta).first()
     if conta:
         client =  Cliente.objects.filter(id=conta.id_client.id).first()
@@ -112,6 +121,15 @@ def getContaTitularID(request,numero_conta):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getExtratoConta(request,id_conta):
+    """
+        Retorna o Extrato de Uma determina Conta Com o Id :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id": int,"id_operacao": int,"valor": float,"id_conta"...}..]"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR E CLIENTES</br>  
+    """
     conta = None
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
@@ -133,6 +151,15 @@ def getExtratoConta(request,id_conta):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request):
+    """
+        Retorna todos as Contas. :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id": int,"numero": "string","saldo": float...}..]"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #o cliente pode ver somente as contas dele
@@ -165,6 +192,15 @@ def getAll(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllByNumero(request,number):
+    """
+        Retorna todos as Contas que contem o número :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id": int,"numero": "string","saldo": float...}..]"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #o cliente pode ver somente as contas dele
@@ -202,6 +238,15 @@ def deleteConta(conta):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def delete(request,id):
+    """
+        Apaga a conta com ID :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Apagado."</br> 
+            RESPONSE CODE 400: invalido.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     try:
         id = int(id)
     except Exception:
@@ -226,6 +271,15 @@ def delete(request,id):
         
 #registrar uma conta
 class Register(APIView):
+    """
+        Cadastra um Conta</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201:{"numero":"string",...} "</br>
+            RESPONSE CODE 404: Não encontrado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
