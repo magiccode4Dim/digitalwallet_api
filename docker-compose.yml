@@ -2,7 +2,6 @@ version: '3'
 
 services:
   opt_server:
-    restart: always
     build:
       context: .
       dockerfile: otp_server.Dockerfile
@@ -14,7 +13,6 @@ services:
     command: >
       sh -c "python myOTPserver.py"
   default_db:
-    restart: always
     image: postgres
     environment:
       POSTGRES_DB: carteiradigital
@@ -23,7 +21,6 @@ services:
     depends_on:
       - opt_server
   temp_db:
-    restart: always
     image: postgres
     environment:
       POSTGRES_DB: tempcarteiradigital
@@ -32,7 +29,6 @@ services:
     depends_on:
       - opt_server
   web:
-    restart: always
     build:
       context: .
       dockerfile: api.Dockerfile
