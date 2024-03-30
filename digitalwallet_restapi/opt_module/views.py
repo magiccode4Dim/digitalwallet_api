@@ -37,6 +37,15 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllTempAgent(request):
+    """
+        Retorna Todos agentes temporários</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -50,6 +59,15 @@ def getAllTempAgent(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllTempClient(request):
+    """
+        Retorna Todos clientes temporários</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -63,6 +81,15 @@ def getAllTempClient(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllTempConta(request):
+    """
+        Retorna Todos Contas temporárias</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -76,6 +103,15 @@ def getAllTempConta(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllTempDeposito(request):
+    """
+        Retorna Todos Depósitostemporários</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -89,6 +125,15 @@ def getAllTempDeposito(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllTempLevantamento(request):
+    """
+        Retorna Todos Levantamentos temporários</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -102,6 +147,15 @@ def getAllTempLevantamento(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllTempTransferencia(request):
+    """
+        Retorna Todas Transferências temporárias</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -115,6 +169,15 @@ def getAllTempTransferencia(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAlloperacaoOPT(request):
+    """
+        Retorna Todos códigos OTP de operações.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -128,6 +191,15 @@ def getAlloperacaoOPT(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllaccontValidationOTP(request):
+    """
+        Retorna Todos codigos OTP de contas por Validar.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int...}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -207,6 +279,15 @@ def moveNewClientContaToMainDB(id_temp,id_client,otp_temp):
 
 #Envio de codigo OPT para validação de uma Conta no sistema, seja ela cliente ou agente
 class otp_account_validation(APIView):
+    """
+        Envio de OTP para validação de Conta de utilizador . {"id_user":int, "otp_code":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: Validado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: NÃO</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]  # Permitir acesso a qualquer um 
     def post(self, request):
@@ -265,6 +346,16 @@ class otp_account_validation(APIView):
 
 #Envio de OPT para validar um conta que o cliente criou para guardar dinheiro mesmo
 class otp_client_account_validation(APIView):
+    """
+        Envio de OTP para validação de Conta de Cliente . { "otp_code":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: Validado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br>
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
@@ -302,6 +393,16 @@ class otp_client_account_validation(APIView):
         
 #Validacao de uma operacao de Deposito
 class otp_deposit_validation(APIView):
+    """
+        Envio de OTP para validação um Depósito. { "otp_code":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: Validado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br>
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: AGENTES</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
@@ -352,6 +453,16 @@ class otp_deposit_validation(APIView):
         
 #Validação de OPeração de Levantamento
 class otp_levantament_validation(APIView):
+    """
+        Envio de OTP para validação um Levantamento. { "otp_code":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: Validado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br>
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
@@ -404,6 +515,16 @@ class otp_levantament_validation(APIView):
         
 #Validação de Operação de Transferencia
 class otp_transferenc_validation(APIView):
+    """
+        Envio de OTP para validação uma Transferência. { "otp_code":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: Validado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br>
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
