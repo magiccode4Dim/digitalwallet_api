@@ -280,7 +280,7 @@ def moveNewClientContaToMainDB(id_temp,id_client,otp_temp):
 #Envio de codigo OPT para validação de uma Conta no sistema, seja ela cliente ou agente
 class otp_account_validation(APIView):
     """
-        Envio de OTP para validação de Conta de utilizador . {"id_user":int, "otp_code":int} :</br>
+        Envio de OTP para validação de Conta de utilizador . {"id_user":int, "otp_code":int}. Se o utilizador a ser validado for um Agente, deve-se adicionar o atributo "Token", passando o token de cadastro :</br>
         </br><b>Possiveis Respostas</b>:</br>   
             RESPONSE CODE 200: Validado."</br> 
             RESPONSE CODE 400: Atributo invalido.</br> 
