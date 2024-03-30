@@ -27,6 +27,15 @@ import cliente
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request):
+    """
+        Retorna todos Clientes :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id": int,"id_user": int,"saldo": float,"celular"...}..]"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR E AGENTES</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #se a pessoa é superuser, entao vai receber todos os dados dos agentes
@@ -55,6 +64,15 @@ def getAll(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getMy(request):
+    """
+        Retorna os dados do Cliente Autenticado :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: {"id": int,"id_user": int,"saldo": float,"celular"...}"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     client = Cliente.objects.filter(id_user=user.id).first()
@@ -69,6 +87,17 @@ def getMy(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get(request,id_client):
+    """
+        Retorna o Cliente com o Id :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: {"id": int,"id_user": int,"saldo": float,"celular"...}"</br>
+            RESPONSE CODE 400: Parametro Invalido.</br>
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 404: Não Encontrado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     agent =  None
     try:
         id_client = int(id_client)
@@ -109,11 +138,21 @@ def updateClient(cli):
     cli.save()
 
 #altera os dados de uma agente (somente o numero de telefone)
-#AGENT(id==id_agent) 
+#CLIENT(id==id_client) 
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def update(request):
+    """
+        Actualiza os dados do a Cliente Autenticado : {"celular":..}</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Actualizado com Sucesso.</br>
+            RESPONSE CODE 400: Parâmetros invalidos.</br>
+            RESPONSE CODE 401: Acesso Negado.</br> 
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     #identificacao
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
