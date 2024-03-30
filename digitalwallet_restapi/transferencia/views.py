@@ -34,6 +34,16 @@ TAXA_DE_TRANSFERENCIA = 3.0
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request,id_conta):
+    """
+        Retorna Todos Transferências de uma determinada  Conta.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int, "valor":float}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 404: Não Encontado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRATOR E CLIENTES</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     cli = Cliente.objects.filter(id_user=user.id).first()
@@ -87,6 +97,16 @@ def transation_Transferencia(contaOrigem,contaDestino,opera,temp_trans,otp_temp)
 
 # Create your views here.
 class Register(APIView):
+    """
+        Cadastra uma Transferência na Tabela Temporaria. {"id_operacao":int, "numero_conta":String..} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Criado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 401: Não autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: CLIENTES</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
