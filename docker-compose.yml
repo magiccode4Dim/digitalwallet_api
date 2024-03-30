@@ -13,6 +13,24 @@ services:
       - PORT_OTP_SERVER=3001
     command: >
       sh -c "python myOTPserver.py"
+  default_db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_DB: carteiradigital
+      POSTGRES_USER: magiccode
+      POSTGRES_PASSWORD: 2024
+    depends_on:
+      - opt_server
+  temp_db:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_DB: tempcarteiradigital
+      POSTGRES_USER: magiccode
+      POSTGRES_PASSWORD: 2024
+    depends_on:
+      - opt_server
   web:
     restart: always
     build:
@@ -33,46 +51,39 @@ services:
       - PORT_OTP_SERVER=3001
       - DJANGO_SUPERUSER_PASSWORD=@senhaMu1toF0RT3
     depends_on:
-      - opt_server
-      - default_db
       - temp_db
+      - default_db
     command: >
-      sh -c " python3 manage.py makemigrations utilizador &
-              python3 manage.py makemigrations agente &
-              python3 manage.py makemigrations cliente &
-              python3 manage.py makemigrations conta &
-              python3 manage.py makemigrations operacao &
-              python3 manage.py makemigrations deposito &
-              python3 manage.py makemigrations levantamento &
-              python3 manage.py makemigrations transferencia &
-              python3 manage.py migrate --database=default admin &
-              python3 manage.py migrate --database=default auth &
-              python3 manage.py migrate --database=default contenttypes &
-              python3 manage.py migrate --database=default sessions &
-              python3 manage.py migrate --database=default utilizador &
-              python3 manage.py migrate --database=default agente &
-              python3 manage.py migrate --database=default cliente &
-              python3 manage.py migrate --database=default conta &
-              python3 manage.py migrate --database=default operacao &
-              python3 manage.py migrate --database=default deposito &
-              python3 manage.py migrate --database=default levantamento &
-              python3 manage.py migrate --database=default transferencia &
-              python3 manage.py migrate --database=default authtoken &
-              python3 manage.py migrate --database=otp_dbtemp opt_module &
-              python3 manage.py createsuperuser --noinput --username magiccode --email magic@magiccode.com &
+      sh -c ' 
+              ./wait-for-it.sh default_db:5432 &&
+              ./wait-for-it.sh temp_db:5432 &&
+              python3 manage.py makemigrations utilizador &&
+              python3 manage.py makemigrations agente &&
+              python3 manage.py makemigrations cliente &&
+              python3 manage.py makemigrations conta &&
+              python3 manage.py makemigrations operacao &&
+              python3 manage.py makemigrations deposito &&
+              python3 manage.py makemigrations levantamento &&
+              python3 manage.py makemigrations transferencia &&
+              python3 manage.py makemigrations opt_module &&
+              python3 manage.py migrate --database=default admin &&
+              python3 manage.py migrate --database=default auth &&
+              python3 manage.py migrate --database=default authtoken &&
+              python3 manage.py migrate --database=default contenttypes &&
+              python3 manage.py migrate --database=default sessions &&
+              python3 manage.py migrate --database=default utilizador &&
+              python3 manage.py migrate --database=default agente &&
+              python3 manage.py migrate --database=default cliente &&
+              python3 manage.py migrate --database=default conta &&
+              python3 manage.py migrate --database=default operacao &&
+              python3 manage.py migrate --database=default deposito &&
+              python3 manage.py migrate --database=default levantamento &&
+              python3 manage.py migrate --database=default transferencia &&
+              python3 manage.py migrate --database=otp_dbtemp opt_module &&
+              python3 manage.py createsuperuser --noinput --username magiccode --email magic@magiccode.com &&
               python3 manage.py runserver 0.0.0.0:8000
-              "
-  default_db:
-    restart: always
-    image: postgres
-    environment:
-      POSTGRES_DB: carteiradigital
-      POSTGRES_USER: magiccode
-      POSTGRES_PASSWORD: 2024
-  temp_db:
-    restart: always
-    image: postgres
-    environment:
-      POSTGRES_DB: tempcarteiradigital
-      POSTGRES_USER: magiccode
-      POSTGRES_PASSWORD: 2024
+              '
+  
+
+  
+  
