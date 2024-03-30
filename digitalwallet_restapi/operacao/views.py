@@ -38,12 +38,21 @@ def allOperationsAgent(agent):
     return allOperations
     
 
-#CLIENT(id_client=id_client),CLIENT(id_agent=id_agent)
+#ADMIN, CLIENT(id_client=id_client),CLIENT(id_agent=id_agent)
 #retorna 1 transferencia de uma operacao
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getByOperationID(request,id_operacao):
+    """
+        Retorna a operação com o ID </br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: {"id":int, "valor":float...}</br>
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     cli = Cliente.objects.filter(id_user=user.id).first()
@@ -82,6 +91,16 @@ def getByOperationID(request,id_operacao):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request):
+    """
+        Retorna todas operações </br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int, "valor":float...}...]</br>
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 404: Não encontrado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     #o cliente pode ver somente as operacoes que pertencem as contas dele dele
@@ -116,6 +135,15 @@ def getAll(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllByContID(request,id_conta):
+    """
+        Retorna todas operações da conta com o ID. </br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int, "valor":float...}...]</br>
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     cli = Cliente.objects.filter(id_user=user.id).first()
@@ -146,6 +174,16 @@ def userIsAgentOrClient(id_user):
 
 # Create your views here.
 class Register(APIView):
+    """
+        Cadastra uma Operação . {"id_conta":int, "valor":float} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Criado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 401: Não autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: AGENTES E CLIENTES</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
