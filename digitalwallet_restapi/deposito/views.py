@@ -31,6 +31,15 @@ from agente.models import Agente
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAllAgent(request):
+    """
+        Retorna Todos os Depósitos de um determinado Agente :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id":int, "valor":float}...]"</br> 
+            RESPONSE CODE 401: Não Autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: AGENTES</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     agent = Agente.objects.filter(id_user=user.id).first()
@@ -46,6 +55,16 @@ def getAllAgent(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAll(request,id_conta):
+    """
+        Retorna depositos de uma determinada conta.</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 200: [{"id": int,"data_deposito": "String","valor": float..}...]"</br>  
+            RESPONSE CODE 401: Acesso Negado.</br>
+            RESPONSE CODE 404: Não Encontrado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: ADMINISTRADOR E CLIENTES</br>  
+    """
     id_user = request.user.id
     user =  User.objects.get(id=id_user)
     cli = Cliente.objects.filter(id_user=user.id).first()
@@ -109,6 +128,16 @@ def operacaoIDisAlreadUsed(id_operacao):
 
 # Create your views here.
 class Register(APIView):
+    """
+        Cadastra um Deposito na Tabela Temporaria. {"id_operacao":int, "id_agent":int} :</br>
+        </br><b>Possiveis Respostas</b>:</br>   
+            RESPONSE CODE 201: Criado."</br> 
+            RESPONSE CODE 400: Atributo invalido.</br> 
+            RESPONSE CODE 401: Não autorizado.</br>
+            RESPONSE CODE 500: Algum erro com o servidor.</br>
+        </br><b>PRECISA DE AUTENTICAÇÃO</b>: SIM</br>
+        </br><b>QUEM PODE ACESSAR?</b>: TODOS</br>  
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]  # Permitir acesso a apenas os que estiverem autenticados
     def post(self, request):
