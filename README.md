@@ -1,5 +1,13 @@
 # digitalwallet_api
 API DE CARTEIRA DIGITAL CLIENTE-AGENTE
+Esta é uma API de uma carteira digital estilo M-pesa ou E-mola feita com Python-Django. Ela conta com diversas funcionalidades como deposito,levantamento e transferencia. Possui código limpo e é totalmente configuravel. Todos os detalhes da sua concepção constam no PDF apicarteiradigital.pdf presente no repositorio.
+## MODELO RELACIONAL 
+![Screenshot_2024-07-28-18-10-59-738_cn wps moffice_eng-edit](https://github.com/user-attachments/assets/e4b0a8e8-a2be-49f5-99ee-36fd08589e9f)
+
+## DOCUMENTAÇÃO
+A documentação da API pode ser encontrada em http://localhost:8000/docs (Para ver todas as rotas da API, é necessário fazer login como admin django na navegador):
+![Screenshot from 2024-07-28 12-57-58](https://github.com/user-attachments/assets/9978abc7-2e83-4951-ba39-d7f6505391ff)
+
 # METODO 1 - INICIO (RECOMENDADO)
 ## INSTALAÇÃO NO DOCKER 
 ***********
@@ -28,6 +36,7 @@ REQUISITOS |
  ** NOTA: 
  1. O servidor MY-OTP pode ser conectado na aplicação Android utilizando o ip e porta do servidor.
  2. Pode também ser conectado com o script python presente na pasta otp_client (RECOMENDADO)
+Visite o repositorio do  servidor my-otp clicando [aqui](https://github.com/magiccode4Dim/MyOtp).
 
  ### CONECTANDO O SERVIDOR MY-OTP VIA SCRIPT PYTHON
  1. Na raiz do projecto, Vá até o directorio otp_client
